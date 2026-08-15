@@ -42,7 +42,7 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
           All notes
         </Link>
         <Link href="/" className="ink-action">
-          Today
+          ← Home
         </Link>
       </header>
       <NoteEditor

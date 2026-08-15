@@ -57,7 +57,7 @@ export default async function CalendarPage() {
           </h1>
         </div>
         <Link href="/" className="ink-action">
-          Today
+          ← Home
         </Link>
       </header>
 

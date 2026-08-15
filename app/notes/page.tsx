@@ -42,7 +42,7 @@ export default async function NotesPage() {
             </button>
           </form>
           <Link href="/" className="ink-action">
-            Today
+            ← Home
           </Link>
         </div>
       </header>

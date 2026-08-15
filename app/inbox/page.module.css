@@ -2,8 +2,6 @@
 .header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
 .eyebrow { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; }
 .title { margin-top: 0.5rem; font-size: 1.875rem; font-style: italic; }
-.homeLink { color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem; }
-.homeLink:hover { color: var(--foreground); }
 .error { border-bottom: 1px solid var(--border); padding-block: 3rem; }
 .errorTitle { font-weight: 500; }
 .errorCopy { max-width: 32rem; margin-top: 0.5rem; color: var(--muted); font-size: 0.875rem; line-height: 1.5rem; }

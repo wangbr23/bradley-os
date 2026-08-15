@@ -39,9 +39,9 @@ export default async function InboxPage() {
         </div>
         <Link
           href="/"
-          className={styles.homeLink}
+          className="ink-action"
         >
-          Today
+          ← Home
         </Link>
       </header>
 
