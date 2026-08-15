@@ -72,7 +72,7 @@ export default async function Home() {
             today={new Date()}
             calendarEvents={calendarEvents}
             calendarWeekStart={range.start}
-            inboxMessages={inboxMessages.slice(0, 3)}
+            inboxMessages={inboxMessages}
             totalUnread={inboxMessages.length}
             recentNotes={noteList.slice(0, 3)}
             totalNotes={noteList.length}

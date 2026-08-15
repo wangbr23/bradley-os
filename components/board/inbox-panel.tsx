@@ -18,11 +18,12 @@ interface InboxPanelProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const InboxPanel = forwardRef<HTMLDivElement, InboxPanelProps>(
-  function InboxPanel({ messages, totalUnread, ...rest }, ref) {
+  function InboxPanel({ messages, totalUnread, className, ...rest }, ref) {
     return (
       <PanelShell
         ref={ref}
         {...rest}
+        className={`inbox-panel${className ? ` ${className}` : ""}`}
         glyph="•"
         eyebrow="Last 24h"
         title="Inbox •"

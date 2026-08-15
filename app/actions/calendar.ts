@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import {
   createPrimaryCalendarEvent,
+  getPrimaryCalendarEvents,
   updatePrimaryCalendarEvent,
   type CalendarEventWrite,
 } from "@/lib/calendar/google";
@@ -13,6 +14,10 @@ async function requireCalendarAccess() {
     throw new Error("Google Calendar access is unavailable");
   }
   return session.googleAccessToken;
+}
+
+export async function getCalendarEvents(start: Date, end: Date) {
+  return getPrimaryCalendarEvents(await requireCalendarAccess(), { start, end });
 }
 
 export async function createCalendarEvent(

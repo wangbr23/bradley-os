@@ -2,6 +2,7 @@
 
 import type {
   DateSelectArg,
+  DatesSetArg,
   EventChangeArg,
   EventClickArg,
   EventInput,
@@ -10,10 +11,11 @@ import interactionPlugin from "@fullcalendar/interaction";
 import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   createCalendarEvent,
+  getCalendarEvents,
   updateCalendarEvent,
 } from "@/app/actions/calendar";
 import {
@@ -45,6 +47,8 @@ function toFullCalendarEvent(event: CalendarEvent): EventInput {
 export function WeekCalendar({ events, initialDate, compact = false }: WeekCalendarProps) {
   const [visibleEvents, setVisibleEvents] = useState(events);
   const [writeError, setWriteError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const rangeRequest = useRef(0);
 
   function handleEventClick(info: EventClickArg) {
     const htmlLink = info.event.extendedProps.htmlLink as string | undefined;
@@ -117,6 +121,22 @@ export function WeekCalendar({ events, initialDate, compact = false }: WeekCalen
     }
   }
 
+  async function handleDatesSet(info: DatesSetArg) {
+    const request = ++rangeRequest.current;
+    setIsLoading(true);
+    setWriteError(null);
+    try {
+      const nextEvents = await getCalendarEvents(info.start, info.end);
+      if (request === rangeRequest.current) setVisibleEvents(nextEvents);
+    } catch {
+      if (request === rangeRequest.current) {
+        setWriteError("Could not load this week from Google Calendar.");
+      }
+    } finally {
+      if (request === rangeRequest.current) setIsLoading(false);
+    }
+  }
+
   return (
     <div className={`calendar-grid${compact ? " calendar-grid--compact" : ""}`}>
       <FullCalendar
@@ -125,7 +145,12 @@ export function WeekCalendar({ events, initialDate, compact = false }: WeekCalen
         initialDate={initialDate}
         firstDay={1}
         timeZone={CALENDAR_TIME_ZONE}
-        headerToolbar={false}
+        headerToolbar={
+          compact
+            ? { start: "prev,next", center: "title", end: "today" }
+            : { start: "prev,next today", center: "title", end: "" }
+        }
+        datesSet={handleDatesSet}
         events={visibleEvents.map(toFullCalendarEvent)}
         editable
         selectable
@@ -155,6 +180,11 @@ export function WeekCalendar({ events, initialDate, compact = false }: WeekCalen
         }}
         dayHeaderFormat={{ weekday: "short", month: "numeric", day: "numeric" }}
       />
+      {isLoading ? (
+        <p className="calendar-load-status" aria-live="polite">
+          Loading week…
+        </p>
+      ) : null}
       {writeError ? (
         <p className="calendar-write-error" role="alert">
           {writeError}

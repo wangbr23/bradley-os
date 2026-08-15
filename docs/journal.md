@@ -83,3 +83,13 @@ Added FullCalendar's official Luxon timezone adapter so `America/Los_Angeles` is
 Enabled FullCalendar selection, dragging, and resizing on both the home-board and full-page week grids. Selecting an empty range prompts for a title and creates the event; moving or resizing an existing event patches its times on the primary Google Calendar. All three operations update local calendar state immediately, persist through authenticated server actions, and roll back with an inline error if Google rejects the write.
 
 The existing OAuth scope already grants Calendar writes, so no additional consent change was required. Lint, generated route types, TypeScript, and the webpack production build pass. Browser verification against the owner's Google Calendar remains before this task is marked complete.
+
+## 2026-08-15 — Calendar week navigation and horizontal scrolling added
+
+Added previous, today, and next controls to both FullCalendar surfaces. Changing weeks now loads that exact visible range from the primary Google Calendar through an authenticated server action; a request counter prevents a slower prior response from overwriting a newer week when navigating quickly. Loading and failure states appear beneath the grid.
+
+Gave the seven-day calendar a fixed minimum canvas width inside a horizontally scrollable container, with a slightly denser minimum on the board panel. Narrow panels now scroll instead of crushing day columns. Lint, generated route types, TypeScript, and the webpack production build pass. Browser verification remains pending alongside the Calendar write interactions.
+
+## 2026-08-15 — Inbox board panel made scrollable
+
+Stopped truncating the home-board inbox digest to three messages and passed the complete bounded unread/24-hour Primary result into the panel. The message region now scrolls vertically when the resized panel cannot display every row, while its header, count, and footer remain fixed. Lint, TypeScript, and the diff whitespace check pass.
