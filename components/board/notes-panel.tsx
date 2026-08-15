@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { createNote } from "@/app/notes/actions";
 import { PanelShell } from "./panel-shell";
+import styles from "./board.module.css";
 
 const relativeTimeFormatter = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
 
@@ -46,7 +47,7 @@ export const NotesPanel = forwardRef<HTMLDivElement, NotesPanelProps>(
               View all
             </Link>
             &nbsp;&nbsp;
-            <form action={createNote} className="inline">
+            <form action={createNote} className={styles.inlineForm}>
               <button type="submit" className="ink-action">
                 New note
               </button>

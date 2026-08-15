@@ -5,6 +5,7 @@ import { type FormEvent, useEffect, useRef, useState, useTransition } from "reac
 
 import { addTodo, deleteTodo, setTodoDone } from "@/app/todos/actions";
 import { PanelShell } from "./panel-shell";
+import styles from "./board.module.css";
 
 export interface BoardTodo {
   id: string;
@@ -107,7 +108,7 @@ export const TodosPanel = forwardRef<HTMLDivElement, TodosPanelProps>(
         statLabel={openCount === 1 ? "item" : "items"}
         afterStat={
           <form ref={addForm} onSubmit={handleAdd} className="panel-todo-add">
-            <label htmlFor="board-new-todo" className="sr-only">
+            <label htmlFor="board-new-todo" className={styles.visuallyHidden}>
               New todo
             </label>
             <input
@@ -125,7 +126,7 @@ export const TodosPanel = forwardRef<HTMLDivElement, TodosPanelProps>(
           </form>
         }
         footer={
-          <p className="font-mono text-[10px] uppercase tracking-wide text-[color:var(--muted)]">
+          <p className={styles.meta}>
             {error
               ? "Action failed — rolled back"
               : isPending

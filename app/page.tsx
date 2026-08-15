@@ -12,6 +12,7 @@ import {
 import { db } from "@/lib/db/client";
 import { notes, todos } from "@/lib/db/schema";
 import { getInboxDigest, type InboxDigestMessage } from "@/lib/mail/inbox";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -41,12 +42,12 @@ export default async function Home() {
   const initialLayout = Array.isArray(persistedLayout) ? (persistedLayout as Layout[]) : null;
 
   return (
-    <div className="flex-1 px-6 py-10 sm:px-10">
-      <div className="mx-auto w-full max-w-5xl">
-        <div className="max-w-sm">
+    <div className={styles.page}>
+      <div className={styles.inner}>
+        <div className={styles.intro}>
           <div className="ledger-rule" />
-          <div className="mt-3 flex items-baseline justify-between">
-            <p className="font-mono text-xs uppercase tracking-wider text-[color:var(--muted)]">
+          <div className={styles.statusRow}>
+            <p className={styles.status}>
               ○ Signed in
             </p>
             <form
@@ -60,13 +61,13 @@ export default async function Home() {
               </button>
             </form>
           </div>
-          <h1 className="mt-4 font-mono text-2xl font-bold tracking-tight">bradley-os</h1>
-          <p className="mt-4 font-serif text-base leading-7 text-[color:var(--muted)]">
+          <h1 className={styles.title}>bradley-os</h1>
+          <p className={styles.welcome}>
             – Welcome, {session?.user?.name ?? session?.user?.email}.
           </p>
         </div>
 
-        <div className="mt-10">
+        <div className={styles.board}>
           <BoardClient
             initialLayout={initialLayout}
             today={new Date()}

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { deleteNote, saveNote } from "@/app/notes/actions";
+import styles from "./note-editor.module.css";
 
 interface NoteEditorProps {
   id: string;
@@ -29,7 +30,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
     immediatelyRender: false,
     editorProps: {
       attributes: {
-        class: "tiptap-note min-h-[24rem] focus:outline-none",
+        class: styles.prose,
       },
     },
     onUpdate({ editor: currentEditor }) {
@@ -70,7 +71,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
   }
 
   return (
-    <article className="mx-auto max-w-2xl py-10">
+    <article className={styles.editor}>
       <input
         value={title}
         onChange={(event) => {
@@ -79,10 +80,10 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
         }}
         aria-label="Note title"
         placeholder="Untitled note"
-        className="w-full border-0 bg-transparent font-serif text-4xl font-semibold tracking-tight outline-none placeholder:text-[color:var(--muted)]"
+        className={styles.title}
       />
 
-      <div className="mt-8 flex flex-wrap items-center gap-x-4 gap-y-3 border-y border-[color:var(--border)] py-3">
+      <div className={styles.toolbar}>
         <button
           type="button"
           onClick={() => editor?.chain().focus().toggleBold().run()}
@@ -115,7 +116,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
         >
           List
         </button>
-        <span className="ml-auto font-mono text-[11px] uppercase tracking-wide text-[color:var(--muted)]">
+        <span className={styles.status}>
           {saveError
             ? "Save failed"
             : isSaving
@@ -126,20 +127,20 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
         </span>
       </div>
 
-      <EditorContent editor={editor} className="py-8" />
+      <EditorContent editor={editor} className={styles.content} />
 
-      <footer className="mt-10 flex items-center justify-between border-t border-[color:var(--border)] pt-5">
+      <footer className={styles.footer}>
         <button
           type="button"
           onClick={handleSave}
           disabled={isSaving || !dirty}
-          className="ink-action disabled:cursor-default disabled:opacity-40"
+          className={`ink-action ${styles.disabled}`}
         >
           Save note
         </button>
-        <span className="flex items-center gap-3">
+        <span className={styles.deleteGroup}>
           {deleteError ? (
-            <span className="font-mono text-[11px] uppercase tracking-wide text-red-700">
+            <span className={styles.deleteError}>
               Delete failed
             </span>
           ) : null}
@@ -147,7 +148,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
             type="button"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="font-mono text-[11px] uppercase tracking-wide text-[color:var(--muted)] hover:text-red-700 disabled:opacity-40"
+            className={styles.deleteButton}
           >
             {isDeleting ? "Deleting…" : "Delete note"}
           </button>

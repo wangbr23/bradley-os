@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import styles from "./board.module.css";
 
 // react-grid-layout measures container width on mount and can't produce a
 // meaningful server render, so the actual grid only ever mounts client-side.
@@ -11,7 +12,7 @@ export const BoardClient = dynamic(
   {
     ssr: false,
     loading: () => (
-      <p className="mt-10 font-mono text-xs text-[color:var(--muted)]">Loading board…</p>
+      <p className={styles.loading}>Loading board…</p>
     ),
   },
 );

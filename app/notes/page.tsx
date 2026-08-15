@@ -5,6 +5,7 @@ import { createNote } from "@/app/notes/actions";
 import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import { db } from "@/lib/db/client";
 import { notes } from "@/lib/db/schema";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -24,17 +25,17 @@ export default async function NotesPage() {
     .orderBy(desc(notes.updatedAt));
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:px-10">
-      <header className="flex items-end justify-between border-b border-[color:var(--border)] pb-5">
+    <main className={styles.page}>
+      <header className={styles.header}>
         <div>
-          <p className="font-mono text-xs uppercase tracking-wider text-[color:var(--accent)]">
+          <p className={styles.eyebrow}>
             {noteList.length} {noteList.length === 1 ? "note" : "notes"}
           </p>
-          <h1 className="mt-2 font-mono text-3xl font-bold tracking-tight">
+          <h1 className={styles.title}>
             Notes
           </h1>
         </div>
-        <div className="flex items-center gap-6">
+        <div className={styles.actions}>
           <form action={createNote}>
             <button type="submit" className="ink-action">
               New note
@@ -47,11 +48,11 @@ export default async function NotesPage() {
       </header>
 
       {noteList.length === 0 ? (
-        <section className="py-16">
-          <p className="text-sm text-[color:var(--muted)]">
+        <section className={styles.empty}>
+          <p className={styles.emptyCopy}>
             Nothing written down. Suspicious.
           </p>
-          <form action={createNote} className="mt-6">
+          <form action={createNote} className={styles.emptyForm}>
             <button type="submit" className="ink-action">
               Write the first note
             </button>
@@ -60,15 +61,15 @@ export default async function NotesPage() {
       ) : (
         <ol>
           {noteList.map((note) => (
-            <li key={note.id} className="border-b border-[color:var(--border)]">
+            <li key={note.id} className={styles.note}>
               <Link
                 href={`/notes/${note.id}`}
-                className="grid gap-2 py-5 sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-8"
+                className={styles.noteLink}
               >
-                <span className="text-lg font-semibold decoration-[color:var(--accent)] decoration-2 underline-offset-4 hover:underline">
+                <span className={styles.noteTitle}>
                   {note.title}
                 </span>
-                <time className="font-mono text-[11px] uppercase tracking-wide text-[color:var(--muted)]">
+                <time className={styles.updated}>
                   Updated {formatUpdatedAt(note.updatedAt)}
                 </time>
               </Link>

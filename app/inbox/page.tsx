@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import { getInboxDigest } from "@/lib/mail/inbox";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -28,32 +29,32 @@ export default async function InboxPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-10 sm:px-10">
-      <header className="flex items-end justify-between border-b border-[color:var(--border)] pb-5">
+    <main className={styles.page}>
+      <header className={styles.header}>
         <div>
-          <p className="font-mono text-xs uppercase tracking-wider text-[color:var(--accent)]">
+          <p className={styles.eyebrow}>
             Last 24 hours
           </p>
-          <h1 className="mt-2 font-serif text-3xl italic">Inbox</h1>
+          <h1 className={styles.title}>Inbox</h1>
         </div>
         <Link
           href="/"
-          className="font-mono text-xs text-[color:var(--muted)] hover:text-[color:var(--foreground)]"
+          className={styles.homeLink}
         >
           Today
         </Link>
       </header>
 
       {error ? (
-        <section className="border-b border-[color:var(--border)] py-12">
-          <h2 className="font-medium">Inbox unavailable.</h2>
-          <p className="mt-2 max-w-lg text-sm leading-6 text-[color:var(--muted)]">
+        <section className={styles.error}>
+          <h2 className={styles.errorTitle}>Inbox unavailable.</h2>
+          <p className={styles.errorCopy}>
             Bradley OS could not connect to Gmail. Check the App Password and
             try refreshing this page.
           </p>
         </section>
       ) : messages.length === 0 ? (
-        <p className="py-16 text-sm text-[color:var(--muted)]">
+        <p className={styles.empty}>
           No unread mail. Go outside.
         </p>
       ) : (
@@ -61,28 +62,28 @@ export default async function InboxPage() {
           {messages.map((message) => (
             <li
               key={message.id}
-              className="grid gap-2 border-b border-[color:var(--border)] py-5 sm:grid-cols-[minmax(10rem,14rem)_1fr_auto] sm:gap-5"
+              className={styles.message}
             >
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium">{message.sender}</p>
+              <div className={styles.messageColumn}>
+                <p className={styles.primary}>{message.sender}</p>
                 {message.senderAddress &&
                 message.senderAddress !== message.sender ? (
-                  <p className="mt-1 truncate font-mono text-[11px] text-[color:var(--muted)]">
+                  <p className={styles.address}>
                     {message.senderAddress}
                   </p>
                 ) : null}
               </div>
-              <div className="min-w-0">
-                <h2 className="truncate text-sm font-medium">
+              <div className={styles.messageColumn}>
+                <h2 className={styles.primary}>
                   {message.subject}
                 </h2>
-                <p className="mt-1 line-clamp-2 text-sm leading-5 text-[color:var(--muted)]">
+                <p className={styles.snippet}>
                   {message.snippet}
                 </p>
               </div>
               <time
                 dateTime={message.receivedAt.toISOString()}
-                className="font-mono text-[11px] text-[color:var(--muted)]"
+                className={styles.time}
               >
                 {formatReceivedAt(message.receivedAt)}
               </time>

@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { NoteEditor } from "@/components/notes/note-editor";
 import { db } from "@/lib/db/client";
 import { notes } from "@/lib/db/schema";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,8 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
   if (!note) notFound();
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-6 py-8 sm:px-10">
-      <header className="flex items-center justify-between border-b border-[color:var(--border)] pb-4">
+    <main className={styles.page}>
+      <header className={styles.header}>
         <Link href="/notes" className="ink-action">
           All notes
         </Link>

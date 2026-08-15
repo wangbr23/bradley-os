@@ -2,6 +2,7 @@ import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { auth, signIn } from "@/auth";
+import styles from "./page.module.css";
 
 export default async function SignInPage() {
   const session = await auth();
@@ -11,21 +12,21 @@ export default async function SignInPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-6">
-      <div className="w-full max-w-sm">
+    <main className={styles.page}>
+      <div className={styles.content}>
         <div className="ledger-rule" />
-        <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[color:var(--muted)]">
+        <p className={styles.eyebrow}>
           ○ Private workspace
         </p>
-        <h1 className="mt-4 font-mono text-2xl font-bold tracking-tight">
+        <h1 className={styles.title}>
           Sign in to bradley-os
         </h1>
-        <p className="mt-4 font-serif text-base leading-7 text-[color:var(--muted)]">
+        <p className={styles.copy}>
           Continue with the single Google account authorized for this app.
         </p>
 
         <form
-          className="mt-8"
+          className={styles.form}
           action={async () => {
             "use server";
 
@@ -44,7 +45,7 @@ export default async function SignInPage() {
           </button>
         </form>
 
-        <p className="mt-10 font-mono text-[11px] tracking-wide text-[color:var(--muted)]">
+        <p className={styles.legend}>
           · task &nbsp;&nbsp; ○ event &nbsp;&nbsp; – note
         </p>
       </div>

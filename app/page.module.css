@@ -1,0 +1,9 @@
+.page { flex: 1; padding: 1.25rem 0.75rem; }
+.inner { width: 100%; margin-inline: auto; }
+.intro { max-width: 24rem; }
+.statusRow { display: flex; align-items: baseline; justify-content: space-between; margin-top: 0.75rem; }
+.status { color: var(--muted); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; }
+.title { margin-top: 1rem; font-family: var(--font-mono); font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
+.welcome { margin-top: 1rem; color: var(--muted); font-size: 1rem; line-height: 1.75rem; }
+.board { margin-top: 1.5rem; }
+@media (min-width: 640px) { .page { padding: 1.5rem 1.25rem; } }

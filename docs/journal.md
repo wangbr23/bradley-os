@@ -93,3 +93,9 @@ Gave the seven-day calendar a fixed minimum canvas width inside a horizontally s
 ## 2026-08-15 — Inbox board panel made scrollable
 
 Stopped truncating the home-board inbox digest to three messages and passed the complete bounded unread/24-hour Primary result into the panel. The message region now scrolls vertically when the resized panel cannot display every row, while its header, count, and footer remain fixed. Lint, TypeScript, and the diff whitespace check pass.
+
+## 2026-08-15 — Inline utility styling moved to CSS Modules
+
+Replaced the long Tailwind utility strings in the home, sign-in, inbox, calendar, notes-list, note-detail, and note-editor JSX with semantic classes from colocated CSS Modules. Moved the remaining small board-only utility styles into a board module and moved root layout sizing and font smoothing into global element rules. Existing shared semantic hooks such as `ink-action`, `panel-row`, and FullCalendar integration classes remain intentionally global.
+
+Removed the obsolete global Tiptap rules after moving editor prose styling beside `NoteEditor`, and recorded the CSS organization convention in `AGENTS.md`. Lint, TypeScript, the diff whitespace check, and the webpack production build pass.

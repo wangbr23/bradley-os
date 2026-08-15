@@ -29,11 +29,20 @@
 }
 
 body {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
   background-color: var(--background);
   background-image: radial-gradient(var(--border) 1px, transparent 1.5px);
   background-size: 22px 22px;
   color: var(--foreground);
   font-family: var(--font-serif), Georgia, serif;
+}
+
+html {
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* A single hairline rule, like the top of a ledger page. */
@@ -76,49 +85,6 @@ body {
 .ink-action:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 3px;
-}
-
-.tiptap-note {
-  color: var(--foreground);
-  font-family: var(--font-serif), Georgia, serif;
-  font-size: 1.1rem;
-  line-height: 1.8;
-}
-
-.tiptap-note > * + * {
-  margin-top: 1rem;
-}
-
-.tiptap-note h2 {
-  margin-top: 2rem;
-  font-family: var(--font-mono);
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.tiptap-note ul {
-  list-style: disc;
-  padding-left: 1.5rem;
-}
-
-.tiptap-note ol {
-  list-style: decimal;
-  padding-left: 1.5rem;
-}
-
-.tiptap-note blockquote {
-  border-left: 2px solid var(--accent);
-  color: var(--muted);
-  padding-left: 1rem;
-}
-
-.tiptap-note p.is-editor-empty:first-child::before {
-  color: var(--muted);
-  content: "Start writing…";
-  float: left;
-  height: 0;
-  pointer-events: none;
 }
 
 /* --- board: panels as full-bordered index cards on the dot-grid desk --- */

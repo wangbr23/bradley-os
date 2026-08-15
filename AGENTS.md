@@ -33,7 +33,7 @@ This is the most important principle in this file. The simple solution beats the
 - DB browser: `npm run db:studio`
 
 ## Conventions
-- Code style: default eslint-config-next; no additional formatter configured yet.
+- Code style: default eslint-config-next; no additional formatter configured yet. Keep page/component presentation in colocated CSS Modules; reserve `app/globals.css` for tokens, resets, and shared semantic primitives rather than Tailwind utility strings in JSX.
 - Testing approach: none set up yet.
 - Commit message format: not yet decided (no git repo initialized yet).
 

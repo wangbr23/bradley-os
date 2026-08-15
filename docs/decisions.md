@@ -111,3 +111,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Use `@fullcalendar/luxon3` with Luxon in every FullCalendar instance and retain `America/Los_Angeles` as the single Calendar timezone.
 
 **Consequences:** The home-board and full-page week grids render consistent Pacific wall times regardless of the browser or deployment server timezone, including automatic PST/PDT transitions.
+
+## 2026-08-15 — Colocate presentation in CSS Modules
+
+**Status:** Accepted
+
+**Context:** Long Tailwind utility strings embedded presentation details throughout JSX and made component structure harder to scan.
+
+**Decision:** Use semantic classes from colocated CSS Modules for page and component presentation. Keep `app/globals.css` for design tokens, resets, shared primitives, and selectors required by third-party integrations.
+
+**Consequences:** JSX emphasizes structure and behavior, while visual changes live in dedicated stylesheets. Shared board and FullCalendar selectors may remain global where their libraries require stable class names.

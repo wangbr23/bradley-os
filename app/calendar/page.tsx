@@ -9,6 +9,7 @@ import {
   getPrimaryCalendarEvents,
   type CalendarEvent,
 } from "@/lib/calendar/google";
+import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +46,13 @@ export default async function CalendarPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-8">
-      <header className="flex items-end justify-between border-b border-[color:var(--border)] pb-5">
+    <main className={styles.page}>
+      <header className={styles.header}>
         <div>
-          <p className="font-mono text-xs uppercase tracking-wider text-[color:var(--accent)]">
+          <p className={styles.eyebrow}>
             {formatRange(range.start, range.end)}
           </p>
-          <h1 className="mt-2 font-mono text-3xl font-bold tracking-tight">
+          <h1 className={styles.title}>
             Calendar
           </h1>
         </div>
@@ -61,11 +62,11 @@ export default async function CalendarPage() {
       </header>
 
       {error ? (
-        <section className="border-b border-[color:var(--border)] py-12">
-          <h2 className="font-mono text-sm font-bold uppercase tracking-wide">
+        <section className={styles.error}>
+          <h2 className={styles.errorTitle}>
             Calendar unavailable
           </h2>
-          <p className="mt-3 max-w-lg text-sm leading-6 text-[color:var(--muted)]">
+          <p className={styles.errorCopy}>
             {error === "access"
               ? "Google Calendar access needs to be renewed. Sign out, then sign in and approve Calendar access."
               : "Bradley OS could not reach Google Calendar. Refresh to try again."}
