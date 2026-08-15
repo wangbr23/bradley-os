@@ -448,6 +448,14 @@ body {
   scrollbar-width: thin;
 }
 
+.calendar-write-error {
+  border-top: 1px solid #b42318;
+  padding: 0.5rem 0;
+  color: #b42318;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
 .panel-footer {
   position: relative;
   margin-top: 1rem;

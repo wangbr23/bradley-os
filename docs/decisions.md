@@ -101,3 +101,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Keep the complete Todos workflow in its board panel with no `/todos` page. Apply changes immediately to local panel state, persist them asynchronously through server actions, and roll back with an error state on failure. Do not revalidate the whole board after todo writes.
 
 **Consequences:** Todo interaction feels immediate while retaining durable Turso storage and failure visibility. A fresh page load remains the source-of-truth reconciliation. Other features still receive board panels by default, but only receive separate pages when their interaction depth requires one.
+
+## 2026-08-15 — Use FullCalendar's Luxon adapter for Pacific time
+
+**Status:** Accepted
+
+**Context:** Passing `America/Los_Angeles` to FullCalendar without a named-timezone adapter allowed event display to follow the browser's Eastern timezone instead of the application's configured Pacific timezone.
+
+**Decision:** Use `@fullcalendar/luxon3` with Luxon in every FullCalendar instance and retain `America/Los_Angeles` as the single Calendar timezone.
+
+**Consequences:** The home-board and full-page week grids render consistent Pacific wall times regardless of the browser or deployment server timezone, including automatic PST/PDT transitions.

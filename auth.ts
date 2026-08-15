@@ -74,7 +74,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return user.email?.toLowerCase() === ownerEmail;
     },
     authorized({ auth: session }) {
-      return Boolean(session?.user);
+      return session?.user?.email?.toLowerCase() === ownerEmail;
     },
     async jwt({ token, account }) {
       if (account) {

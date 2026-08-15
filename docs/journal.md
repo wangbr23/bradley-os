@@ -71,3 +71,15 @@ Changed Todos to update optimistically in local panel state, persist to Turso in
 Replaced the chronological `/calendar` event list with a Monday-starting FullCalendar time grid. The page still loads the primary Google Calendar on the server, but now displays the current Pacific-time week with timed and all-day events, a current-time indicator, and links back to the source event in Google Calendar. The compact Calendar board panel remains unchanged.
 
 Aligned `@fullcalendar/react` with the existing FullCalendar 6.1.21 packages to avoid mixing major versions, and added styling that follows the app's existing ink, hairline, mono-type visual system. Lint, generated route types, TypeScript, and the webpack production build pass. Next: browser-check the grid, then add Google Calendar write persistence for drag-to-create, drag-to-move, and drag-to-resize.
+
+## 2026-08-15 — Full week grid added to the Calendar board panel
+
+Replaced the home Calendar panel's compact chronological summary with the same Monday–Sunday FullCalendar time grid used on `/calendar`. The board now receives the whole current week, preserves a practical minimum panel height, and keeps the full-page link for a larger view.
+
+Added FullCalendar's official Luxon timezone adapter so `America/Los_Angeles` is interpreted explicitly rather than falling back to the browser's local Eastern timezone. The owner visually confirmed the board calendar looks correct. Lint, generated route types, TypeScript, and the webpack production build pass. Next: implement drag-to-create, drag-to-move, and drag-to-resize with Google Calendar persistence.
+
+## 2026-08-15 — Calendar write interactions implemented
+
+Enabled FullCalendar selection, dragging, and resizing on both the home-board and full-page week grids. Selecting an empty range prompts for a title and creates the event; moving or resizing an existing event patches its times on the primary Google Calendar. All three operations update local calendar state immediately, persist through authenticated server actions, and roll back with an inline error if Google rejects the write.
+
+The existing OAuth scope already grants Calendar writes, so no additional consent change was required. Lint, generated route types, TypeScript, and the webpack production build pass. Browser verification against the owner's Google Calendar remains before this task is marked complete.

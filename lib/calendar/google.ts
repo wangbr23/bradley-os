@@ -2,13 +2,20 @@ import "server-only";
 
 import { google, type calendar_v3 } from "googleapis";
 
-import { CALENDAR_TIME_ZONE, type CalendarEvent } from "./format";
+import { CALENDAR_TIME_ZONE, getDayKey, type CalendarEvent } from "./format";
 
 export { CALENDAR_TIME_ZONE, getDayKey, type CalendarEvent } from "./format";
 
 export interface CalendarRange {
   start: Date;
   end: Date;
+}
+
+export interface CalendarEventWrite {
+  title?: string;
+  start: Date;
+  end: Date;
+  allDay: boolean;
 }
 
 function getDateParts(date: Date) {
@@ -91,6 +98,54 @@ function normalizeEvent(event: calendar_v3.Schema$Event): CalendarEvent | null {
     location: event.location || undefined,
     htmlLink: event.htmlLink || undefined,
   };
+}
+
+function toGoogleEventTimes(input: CalendarEventWrite) {
+  if (input.allDay) {
+    return {
+      start: { date: getDayKey(input.start) },
+      end: { date: getDayKey(input.end) },
+    };
+  }
+
+  return {
+    start: { dateTime: input.start.toISOString(), timeZone: CALENDAR_TIME_ZONE },
+    end: { dateTime: input.end.toISOString(), timeZone: CALENDAR_TIME_ZONE },
+  };
+}
+
+export async function createPrimaryCalendarEvent(
+  accessToken: string,
+  input: CalendarEventWrite & { title: string },
+) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  const calendar = google.calendar({ version: "v3", auth });
+  const response = await calendar.events.insert({
+    calendarId: "primary",
+    requestBody: {
+      summary: input.title,
+      ...toGoogleEventTimes(input),
+    },
+  });
+
+  if (!response.data.id) throw new Error("Google Calendar did not return an event ID");
+  return { id: response.data.id, htmlLink: response.data.htmlLink ?? undefined };
+}
+
+export async function updatePrimaryCalendarEvent(
+  accessToken: string,
+  eventId: string,
+  input: CalendarEventWrite,
+) {
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
+  const calendar = google.calendar({ version: "v3", auth });
+  await calendar.events.patch({
+    calendarId: "primary",
+    eventId,
+    requestBody: toGoogleEventTimes(input),
+  });
 }
 
 export async function getPrimaryCalendarEvents(
