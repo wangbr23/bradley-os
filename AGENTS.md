@@ -2,8 +2,17 @@
 
 A single-user web app that replaces mail, calendar, and notes with one daily-driver: what's unread, what's next, what you were thinking. Full spec: `docs/designs/2026-08-15-v1-design-spec.html`.
 
+## Design principle: KISS
+
+This is the most important principle in this file. The simple solution beats the clever one — always — unless there's a concrete, stated reason the simple version actually breaks. This is a single-user app; it does not need the abstractions, configurability, or defensiveness of software built for many users or many contributors.
+
+- Don't add a layer, config option, or abstraction for a future need — add it when that need is real.
+- Prefer the boring, obvious implementation over the elegant one, if the boring one is easier to read and change later.
+- If you're about to introduce a new file, pattern, or dependency to solve a problem, first check whether the existing code can just be changed instead.
+- When a review or a fix has more than one option, default to the smaller, more direct one. Reach for the more involved fix only when the simple one has a concrete, documented shortcoming — not "might not scale" or "isn't the textbook pattern."
+
 ## Stack
-- Language/runtime: TypeScript, Node.js 24 LTS (system CA store enabled for networked app commands)
+- Language/runtime: TypeScript, Node.js 24 LTS (local app commands use Homebrew's CA bundle when available)
 - Framework: Next.js (App Router), Tailwind CSS, @base-ui/react
 - Data: Turso (libSQL/SQLite) via Drizzle ORM
 - Auth: Auth.js (next-auth@beta), Google provider, single-email allowlist

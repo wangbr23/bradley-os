@@ -2,9 +2,15 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
 const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
+const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
 
 if (!ownerEmail) {
   throw new Error("OWNER_EMAIL is required");
+}
+
+if (!googleClientId || !googleClientSecret) {
+  throw new Error("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required");
 }
 
 async function refreshGoogleAccessToken(token: {
@@ -46,6 +52,8 @@ async function refreshGoogleAccessToken(token: {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google({
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
       authorization: {
         params: {
           access_type: "offline",

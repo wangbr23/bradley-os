@@ -11,7 +11,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] Scaffold the Next.js app; fill in `AGENTS.md`'s Stack/Commands sections from the design spec
 
 ## v0 — first end-to-end slice
-- [ ] Auth — sign in with Google, single-email allowlist
+- [x] Auth — sign in with Google, single-email allowlist
 - [ ] Inbox digest — IMAP fetch, unread/24h list, no styling polish
 - [ ] Calendar — read Google Calendar, list view only, no drag yet
 - [ ] Notes — flat list + Tiptap editor, no diagrams yet

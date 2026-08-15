@@ -6,9 +6,9 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "NODE_OPTIONS=--use-system-ca next dev",
-    "build": "NODE_OPTIONS=--use-system-ca next build",
-    "start": "NODE_OPTIONS=--use-system-ca next start",
+    "dev": "./scripts/next-with-local-ca.sh dev",
+    "build": "./scripts/next-with-local-ca.sh build",
+    "start": "./scripts/next-with-local-ca.sh start",
     "lint": "eslint",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
