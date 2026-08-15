@@ -12,12 +12,15 @@ export default async function SignInPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
-      <section className="w-full max-w-sm border border-[color:var(--border)] bg-[color:var(--background)] p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-[color:var(--accent)]">
-          Private workspace
+      <div className="w-full max-w-sm">
+        <div className="ledger-rule" />
+        <p className="mt-3 font-mono text-xs uppercase tracking-wider text-[color:var(--muted)]">
+          ○ Private workspace
         </p>
-        <h1 className="mt-3 text-2xl font-semibold">Sign in to bradley-os</h1>
-        <p className="mt-3 text-sm leading-6 text-[color:var(--muted)]">
+        <h1 className="mt-4 font-mono text-2xl font-bold tracking-tight">
+          Sign in to bradley-os
+        </h1>
+        <p className="mt-4 font-serif text-base leading-7 text-[color:var(--muted)]">
           Continue with the single Google account authorized for this app.
         </p>
 
@@ -36,14 +39,15 @@ export default async function SignInPage() {
             }
           }}
         >
-          <button
-            type="submit"
-            className="w-full cursor-pointer border border-[color:var(--foreground)] px-4 py-3 text-sm font-medium transition-colors duration-150 hover:bg-[color:var(--foreground)] hover:text-[color:var(--background)]"
-          >
-            Continue with Google
+          <button type="submit" className="ink-action">
+            • Continue with Google
           </button>
         </form>
-      </section>
+
+        <p className="mt-10 font-mono text-[11px] tracking-wide text-[color:var(--muted)]">
+          · task &nbsp;&nbsp; ○ event &nbsp;&nbsp; – note
+        </p>
+      </div>
     </main>
   );
 }

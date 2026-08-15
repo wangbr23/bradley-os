@@ -12,7 +12,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 
 ## v0 — first end-to-end slice
 - [x] Auth — sign in with Google, single-email allowlist
-- [ ] Inbox digest — IMAP fetch, unread/24h list, no styling polish
+- [x] Inbox digest — IMAP fetch, unread/24h list, no styling polish
 - [ ] Calendar — read Google Calendar, list view only, no drag yet
 - [ ] Notes — flat list + Tiptap editor, no diagrams yet
 - [ ] Todos — flat checklist

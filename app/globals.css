@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f5f1;
+  --background: #ffffff;
   --foreground: #1a1a18;
   --muted: #6b6459;
   --border: #dedad1;
@@ -14,7 +14,7 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
-  --font-sans: var(--font-geist-sans);
+  --font-serif: var(--font-newsreader);
   --font-mono: var(--font-geist-mono);
 }
 
@@ -29,7 +29,57 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image: radial-gradient(var(--border) 1px, transparent 1.5px);
+  background-size: 22px 22px;
   color: var(--foreground);
-  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+/* A single hairline rule, like the top of a ledger page. */
+.ledger-rule {
+  border-top: 1px solid var(--border);
+}
+
+/* An action styled like an ink underline instead of a filled button. */
+.ink-action {
+  position: relative;
+  display: inline-block;
+  border: none;
+  background: none;
+  padding: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--foreground);
+  cursor: pointer;
+}
+
+.ink-action::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: height 150ms linear, opacity 150ms linear;
+}
+
+.ink-action:hover::after,
+.ink-action:focus-visible::after {
+  height: 0.55rem;
+  opacity: 0.3;
+}
+
+.ink-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ink-action::after {
+    transition: none;
+  }
 }

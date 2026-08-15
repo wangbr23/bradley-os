@@ -31,3 +31,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Pin Bradley OS to Node.js 24 LTS. Local Next.js scripts use Homebrew's CA bundle when it exists and otherwise leave the environment's native certificate configuration unchanged.
 
 **Consequences:** Local Google OAuth and build-time font downloads work without disabling TLS verification. Developers need Node.js 24; Vercel and non-Homebrew environments keep their own trust configuration.
+
+## 2026-08-15 — Keep the Gmail integration read-only and ephemeral
+
+**Status:** Accepted
+
+**Context:** Bradley OS needs a daily signal view of recent unread mail, not another mail client or a second mail database.
+
+**Decision:** Connect to Gmail with ImapFlow and the owner's App Password, open INBOX read-only, and fetch at most 50 unread messages from the last 24 hours on request. Fetch only bounded preview data and message metadata; do not store messages locally or expose mail credentials to client code.
+
+**Consequences:** Viewing the digest cannot mark mail read or mutate Gmail, and there is no local synchronization state to maintain. Every page load depends on Gmail availability and incurs a fresh IMAP connection; richer mail actions remain outside v1 scope.
