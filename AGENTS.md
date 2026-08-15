@@ -10,6 +10,7 @@ This is the most important principle in this file. The simple solution beats the
 - Prefer the boring, obvious implementation over the elegant one, if the boring one is easier to read and change later.
 - If you're about to introduce a new file, pattern, or dependency to solve a problem, first check whether the existing code can just be changed instead.
 - When a review or a fix has more than one option, default to the smaller, more direct one. Reach for the more involved fix only when the simple one has a concrete, documented shortcoming — not "might not scale" or "isn't the textbook pattern."
+- Unless explicitly excluded, every new user-facing feature includes a home-board panel. Reuse `PanelShell`; add a separate full page only when the feature needs more space or depth than its panel.
 
 ## Stack
 - Language/runtime: TypeScript, Node.js 24 LTS (local app commands use Homebrew's CA bundle when available)
@@ -37,7 +38,7 @@ This is the most important principle in this file. The simple solution beats the
 - Commit message format: not yet decided (no git repo initialized yet).
 
 ## Architecture
-Single Next.js app, no monorepo tooling. Route Handlers/Server Actions carry the backend — no separate API service. Calendar events are never stored locally; Google Calendar is the system of record. `lib/db/schema.ts` holds the three tables that *are* stored locally: `notes`, `diagrams` (optionally linked to a note), `todos`. See the design spec (`docs/designs/2026-08-15-v1-design-spec.html`) for the full reasoning and the planned `app/`/`lib/`/`components/` layout.
+Single Next.js app, no monorepo tooling. Route Handlers/Server Actions carry the backend — no separate API service. Calendar events are never stored locally; Google Calendar is the system of record. `lib/db/schema.ts` holds four local tables: `notes`, `diagrams` (optionally linked to a note), `todos`, and the persisted home-board `layouts`. See the design spec (`docs/designs/2026-08-15-v1-design-spec.html`) and board design (`docs/designs/2026-08-15-board-home-screen.md`) for the reasoning.
 
 ## Context files
 Keep these current — they're what gives any session, or either CLI tool, continuity without re-deriving history from scratch.

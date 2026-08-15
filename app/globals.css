@@ -78,8 +78,375 @@ body {
   outline-offset: 3px;
 }
 
+.tiptap-note {
+  color: var(--foreground);
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.tiptap-note > * + * {
+  margin-top: 1rem;
+}
+
+.tiptap-note h2 {
+  margin-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.tiptap-note ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap-note ol {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+
+.tiptap-note blockquote {
+  border-left: 2px solid var(--accent);
+  color: var(--muted);
+  padding-left: 1rem;
+}
+
+.tiptap-note p.is-editor-empty:first-child::before {
+  color: var(--muted);
+  content: "Start writing…";
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* --- board: panels as full-bordered index cards on the dot-grid desk --- */
+
+.panel-card {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  background: var(--background);
+  border: 1px solid var(--border);
+  padding: 1.1rem 1.3rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-watermark {
+  position: absolute;
+  top: -0.4rem;
+  right: 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--accent);
+  opacity: 0.08;
+  pointer-events: none;
+  user-select: none;
+}
+
+.panel-drag-handle {
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+  cursor: grab;
+  transition: border-bottom-width 150ms linear, border-bottom-color 150ms linear;
+}
+
+.panel-drag-handle:hover {
+  border-bottom-width: 3px;
+  border-bottom-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+.panel-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.panel-title {
+  margin-top: 0.2rem;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.panel-stat {
+  position: relative;
+  margin-top: 0.8rem;
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+}
+
+.panel-stat-num {
+  font-family: var(--font-mono);
+  font-size: 1.9rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.panel-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+
+.panel-week-strip {
+  position: relative;
+  display: flex;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+}
+
+.panel-week-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+}
+
+.panel-week-dot[data-busy="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.panel-week-dot[data-today="true"] {
+  outline: 1px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+.panel-rows {
+  position: relative;
+  margin-top: 0.9rem;
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.7rem;
+  align-items: baseline;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.panel-row:first-child {
+  border-top: none;
+}
+
+.panel-row .row-main {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8rem;
+}
+
+.panel-row .row-main .glyph {
+  color: var(--accent);
+  margin-right: 0.3rem;
+}
+
+.panel-row .row-sub {
+  color: var(--muted);
+}
+
+.panel-row .row-time {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.panel-empty {
+  margin-top: 0.9rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
+}
+
+.todos-panel .panel-rows {
+  overflow-y: auto;
+}
+
+.todos-panel .panel-row {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.panel-todo-add {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.65rem;
+}
+
+.panel-todo-add input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.8rem;
+  outline: none;
+}
+
+.panel-todo-add input::placeholder {
+  color: var(--muted);
+}
+
+.panel-todo-check {
+  display: flex;
+  width: 1rem;
+  height: 1rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--background);
+  cursor: pointer;
+}
+
+.panel-todo-check[data-done="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+.todos-panel .row-main[data-done="true"] {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--border);
+}
+
+.panel-todo-delete {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.panel-todo-delete:hover {
+  color: #b42318;
+}
+
+/* --- FullCalendar: week grid in the same ink-and-hairline system --- */
+
+.calendar-grid {
+  margin-top: 1.5rem;
+  background: var(--background);
+  font-family: var(--font-mono);
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--background);
+  --fc-neutral-bg-color: var(--background);
+  --fc-neutral-text-color: var(--muted);
+  --fc-today-bg-color: color-mix(in srgb, var(--accent) 7%, var(--background));
+  --fc-now-indicator-color: var(--accent);
+  --fc-event-bg-color: var(--foreground);
+  --fc-event-border-color: var(--foreground);
+  --fc-event-text-color: var(--background);
+}
+
+.calendar-grid .fc-theme-standard td,
+.calendar-grid .fc-theme-standard th,
+.calendar-grid .fc-theme-standard .fc-scrollgrid {
+  border-color: var(--border);
+}
+
+.calendar-grid .fc-scrollgrid {
+  border-radius: 0;
+}
+
+.calendar-grid .fc-col-header-cell-cushion,
+.calendar-grid .fc-timegrid-axis-cushion,
+.calendar-grid .fc-timegrid-slot-label-cushion,
+.calendar-grid .fc-timegrid-axis-frame {
+  color: var(--muted);
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.calendar-grid .fc-col-header-cell-cushion {
+  padding: 0.65rem 0.25rem;
+  color: var(--foreground);
+  font-weight: 700;
+}
+
+.calendar-grid .fc-timegrid-slot {
+  height: 2rem;
+}
+
+.calendar-grid .fc-timegrid-slot-minor {
+  border-top-style: dotted;
+}
+
+.calendar-grid .fc-event {
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+
+.calendar-grid .fc-event-main {
+  padding: 0.15rem 0.25rem;
+}
+
+.calendar-grid .fc-timegrid-now-indicator-line {
+  border-width: 1px 0 0;
+}
+
+.panel-footer {
+  position: relative;
+  margin-top: 1rem;
+}
+
+/* Restyle react-grid-layout's default resize handle into a corner tick. */
+.react-resizable-handle {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  width: 10px;
+  height: 10px;
+  background: none !important;
+  border-right: 1px solid var(--muted);
+  border-bottom: 1px solid var(--muted);
+  transition: border-color 150ms linear;
+}
+
+.panel-card:hover .react-resizable-handle {
+  border-color: var(--accent);
+}
+
+/* react-grid-layout's own drag placeholder, restyled to a dashed outline. */
+.react-grid-placeholder {
+  background: transparent !important;
+  border: 1px dashed var(--border);
+  opacity: 1 !important;
+  border-radius: 0 !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ink-action::after {
+    transition: none;
+  }
+
+  .panel-drag-handle {
     transition: none;
   }
 }

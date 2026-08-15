@@ -17,3 +17,57 @@ Resolved local HTTPS failures by upgrading the development runtime from EOL Node
 Added ImapFlow and an authenticated `/inbox` surface that lists unread Gmail messages received within the last 24 hours. The server-only reader opens INBOX read-only, uses Gmail's raw unread/newer-than-one-day search, applies an exact 24-hour cutoff, caps results at 50, and fetches sender, subject, timestamp, and a bounded source preview without setting `Seen`. Added empty and connection-error states plus an inbox link from the signed-in home screen.
 
 Verified the configured account successfully over IMAP without logging message content; 24 messages matched at verification time. Lint, TypeScript, and the webpack production build pass. Next: add the read-only Google Calendar list.
+
+## 2026-08-15 — session progress reconciled
+
+Narrowed the inbox digest from every Gmail inbox category to the Primary category only, while retaining the unread and exact 24-hour filters. The verified match count dropped from 24 messages across all categories to 3 Primary messages. Lint and TypeScript still pass.
+
+Auth and the Primary inbox digest are complete. Next: implement the v0 read-only Google Calendar list using the Calendar token already carried by the Auth.js session.
+
+## 2026-08-15 — v0 calendar list completed
+
+Added Google's official API client and an authenticated `/calendar` page backed by the primary Google Calendar. The server expands recurring events and fetches a seven-day window without storing events locally. The chronological view handles timed and all-day events, empty days, locations, links to Google Calendar, access-renewal guidance, and request failures. Added Calendar navigation from the signed-in home screen.
+
+Verified the view against the owner's real calendar, then changed calendar boundaries, grouping, and display formatting to `America/Los_Angeles` so PST/PDT transitions are handled automatically. Lint, TypeScript, and the webpack production build pass. Next: build the v0 flat notes list and Tiptap editor.
+
+## 2026-08-15 — v0 notes implementation awaiting browser verification
+
+Applied the existing Drizzle schema to the previously empty Turso database, creating the planned notes, diagrams, and todos tables. Added an authenticated `/notes` list, note creation, individual `/notes/[id]` editing, explicit save status, deletion confirmation, and Tiptap controls for bold, italic, headings, and lists. Added Notes navigation from the signed-in home screen and reading-focused editor styles.
+
+Verified Turso create/read/update/delete behavior with a temporary record that was removed afterward. Lint, TypeScript, and the webpack production build pass. Notes remains incomplete in TODO until the create/save/reload/delete flow is confirmed in the browser. Next: verify Notes at `/notes`; once confirmed, mark it complete and proceed to the v0 flat todo checklist.
+
+## 2026-08-15 — Board home screen (v1 Today dashboard) implemented
+
+Replaced the home screen's flat link list with a drag-to-rearrange, resizable board of Calendar/Inbox/Notes panels. Preceded by design work: a design doc (`docs/designs/2026-08-15-board-home-screen.md`) grounded in the actual v0 code, then two rounds of visual mocking — an initial whitespace-separated bullet-journal layout that read as flat, then a revision (after reviewing a reference widget-kit image for what makes something "feel like a component") to full hairline-bordered index-card panels with a headline stat, an oversized low-opacity watermark glyph, and a 7-dot week strip for Calendar — all still built from the existing dot-grid/hairline/glyph/mono design tokens, no cards-with-shadows creeping in.
+
+Implementation: added a `layouts` table (single JSON row) for persisting panel position/size; split `lib/calendar/google.ts` into a server-only Google API module plus a new client-safe `lib/calendar/format.ts` for the pure date-formatting helpers, since the client-only board can't import anything that pulls in `googleapis`/`server-only`; added `react-grid-layout` (pinned to the 1.x line, verified its `GridItem.js` already passes `nodeRef` for React 19 safety before adopting); built a shared `panel-shell.tsx` plus three thin panel components; wired `app/page.tsx` to fetch all three summaries via one `Promise.all` (simpler than per-panel Suspense, and RGL needs all panels present as children at once anyway) and render the board.
+
+Along the way: fixed `db:push`/`db:studio` hanging indefinitely against Turso — they weren't using the Homebrew CA bundle the way `dev`/`build`/`start` already did; generalized the wrapper into `scripts/with-local-ca.sh` to cover all of them. Also found and fixed a real bug via live browser testing (Chrome DevTools automation): resize wasn't working because `react-resizable`'s injected `children` prop (carrying the resize-handle element) was being silently shadowed by each panel component's own explicit JSX children when spread through `{...rest}` — fixed by moving row content to an explicit `rows` prop on `PanelShell`, freeing `children` for the injected handle to actually render. Confirmed in-browser afterward: drag and resize both work.
+
+Added a "Design principle: KISS" section to `AGENTS.md` — the simple solution wins unless there's a concrete, stated reason it doesn't; the double-refresh code-review finding from earlier this session was resolved under this lens (left as-is, documented as an accepted tradeoff, rather than adding a split auth-config file for a narrow single-user race).
+
+Lint and the production build pass; drag/resize verified live in the browser. Still open: confirm layout position/size actually persists across a reload, and a full visual pass in both light/dark system theme. Next: browser-verify Notes (carried over from the previous session), then the v0 flat todo checklist.
+
+## 2026-08-15 — Notes and board persistence verified
+
+Browser verification confirmed the Notes create/save/reload/delete flow works. Also confirmed that board panel positions and sizes persist across a page reload. Marked the v0 Notes slice complete and removed the Today dashboard's persistence-verification qualifier.
+
+Still open for the board: a full visual pass in both light and dark system themes. Next development feature: the v0 flat todo checklist, followed by adding Todos to the home board.
+
+## 2026-08-15 — v0 Todos and board panel implemented
+
+Added a persistent `/todos` checklist with add, complete/reopen, and delete actions. Open items sort before completed items. Verified the Turso lifecycle with a temporary todo that was removed afterward. Added Todos as a fourth board component using the shared panel shell: it shows the open count, up to three open items, and links to the full checklist.
+
+Existing persisted three-panel layouts are preserved; when the Todos panel is first encountered it is appended below the saved arrangement rather than resetting the user's positions. Recorded the new product convention that future user-facing features include a compact board component unless explicitly excluded. Lint, TypeScript, and the webpack production build pass. Todos remains unchecked until the full page and panel are browser-verified.
+
+## 2026-08-15 — Todos moved entirely into the board
+
+Removed the standalone `/todos` page and moved the complete add/check/reopen/delete workflow into the Todos board panel. The first add implementation felt unresponsive because it waited for Turso and revalidated `/`, which rebuilt the entire board and refetched Gmail and Google Calendar.
+
+Changed Todos to update optimistically in local panel state, persist to Turso in the background, and roll back visibly if a write fails. Todo actions no longer revalidate unrelated home-page data. Updated the board-first convention: every feature gets a panel by default, while a separate full page is added only when the feature needs more space or depth. Lint, generated route types, and TypeScript pass. Browser verification remains pending.
+
+## 2026-08-15 — Calendar page replaced with a FullCalendar week grid
+
+Replaced the chronological `/calendar` event list with a Monday-starting FullCalendar time grid. The page still loads the primary Google Calendar on the server, but now displays the current Pacific-time week with timed and all-day events, a current-time indicator, and links back to the source event in Google Calendar. The compact Calendar board panel remains unchanged.
+
+Aligned `@fullcalendar/react` with the existing FullCalendar 6.1.21 packages to avoid mixing major versions, and added styling that follows the app's existing ink, hairline, mono-type visual system. Lint, generated route types, TypeScript, and the webpack production build pass. Next: browser-check the grid, then add Google Calendar write persistence for drag-to-create, drag-to-move, and drag-to-resize.

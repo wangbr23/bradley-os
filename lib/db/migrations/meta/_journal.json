@@ -8,6 +8,13 @@
       "when": 1786775978383,
       "tag": "0000_lovely_goblin_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786814854522,
+      "tag": "0001_marvelous_wiccan",
+      "breakpoints": true
     }
   ]
 }

@@ -91,7 +91,7 @@ export async function getInboxDigest(): Promise<InboxDigestMessage[]> {
     await client.mailboxOpen("INBOX", { readOnly: true });
 
     const matches = await client.search(
-      { gmraw: "is:unread newer_than:1d" },
+      { gmraw: "category:primary is:unread newer_than:1d" },
       { uid: true },
     );
 

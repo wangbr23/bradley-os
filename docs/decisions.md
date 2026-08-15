@@ -41,3 +41,63 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Connect to Gmail with ImapFlow and the owner's App Password, open INBOX read-only, and fetch at most 50 unread messages from the last 24 hours on request. Fetch only bounded preview data and message metadata; do not store messages locally or expose mail credentials to client code.
 
 **Consequences:** Viewing the digest cannot mark mail read or mutate Gmail, and there is no local synchronization state to maintain. Every page load depends on Gmail availability and incurs a fresh IMAP connection; richer mail actions remain outside v1 scope.
+
+## 2026-08-15 — Limit the inbox digest to Gmail Primary
+
+**Status:** Accepted
+
+**Context:** Gmail's IMAP `INBOX` contains Primary, Promotions, Social, Updates, and Forums. Showing every category made the digest noisier than the daily signal view Bradley OS is intended to provide.
+
+**Decision:** Add Gmail's `category:primary` raw-search filter alongside `is:unread` and `newer_than:1d`, followed by the existing exact 24-hour cutoff.
+
+**Consequences:** Promotions and other categorized inbox mail no longer appear in Bradley OS even when unread. Gmail remains responsible for category classification.
+
+## 2026-08-15 — Display calendar dates in Pacific time
+
+**Status:** Accepted
+
+**Context:** Calendar day boundaries and displayed event times need one explicit application timezone rather than depending on the deployment server or browser location.
+
+**Decision:** Use the IANA timezone `America/Los_Angeles` for Calendar API ranges, day grouping, and displayed event times.
+
+**Consequences:** Bradley OS follows Pacific time and automatically switches between PST and PDT. Events may appear on a different day than in clients configured for another timezone, by design.
+
+## 2026-08-15 — Adopt KISS as the primary design principle
+
+**Status:** Accepted
+
+**Context:** As the app grows past v0, there's a real risk of accumulating speculative abstractions, configurability, or defensiveness built for many users or many contributors — none of which this single-user app needs.
+
+**Decision:** Recorded a "Design principle: KISS" section at the top of `AGENTS.md`: the simple, direct, boring solution wins over the clever one unless there's a concrete, stated reason it actually breaks. Applies to code and to review findings alike — e.g. a double Google-token-refresh-per-page-load bug was deliberately left as-is (documented as an accepted tradeoff) rather than fixed with a more architecturally "correct" split auth-config file, since the fix would add a permanent abstraction to prevent a narrow, low-stakes race in an app with one user.
+
+**Consequences:** Future technical decisions should default to the smaller fix; reaching for a bigger one requires naming the concrete problem the simple version has, not just citing best practice or future-proofing.
+
+## 2026-08-15 — Board home screen: react-grid-layout, persisted to a new `layouts` table
+
+**Status:** Accepted
+
+**Context:** The home screen needed to become a drag-to-rearrange, resizable board of Calendar/Inbox/Notes panels (the "Today dashboard" already scoped for v1), each with a compact summary and a "view all" link to the existing full page.
+
+**Decision:** Use `react-grid-layout`, pinned to the mature 1.x line rather than the in-progress v2 rewrite (verified its `GridItem.js` already passes `nodeRef` to `react-draggable`, so it's React 19-safe). Persist panel position/size to a new `layouts` table — a single row holding one JSON blob, the same shape as `notes.bodyJson`/`diagrams.sceneJson` — rather than `localStorage`, since this is a daily-driver app plausibly opened from more than one device. Expand ("view all") navigates to the existing `/inbox`/`/calendar`/`/notes` pages rather than an overlay/modal, reusing what already works.
+
+**Consequences:** Layout survives across devices/sessions at the cost of one small table and a debounced server action. The client-only board (loaded via a client-component wrapper around `next/dynamic(..., { ssr: false })`, since `next/dynamic` disallows `ssr: false` directly inside a Server Component) can't import anything that pulls in `googleapis`/`server-only` — this required splitting `lib/calendar/google.ts`'s pure date-formatting helpers into a new client-safe `lib/calendar/format.ts`, a pattern to reuse if other server-only modules need a client-facing subset in the future.
+
+## 2026-08-15 — New features are board-first by default
+
+**Status:** Accepted
+
+**Context:** The home board is now Bradley OS's primary daily interface. Shipping full-page features without a board representation makes them harder to discover and leaves the daily overview incomplete.
+
+**Decision:** Every new user-facing feature includes a compact home-board component unless the feature request explicitly excludes one. Board panels reuse `PanelShell`, summarize rather than duplicate the full feature, and navigate to the full page for deeper interaction.
+
+**Consequences:** Feature scope now normally includes both a full surface and a compact serializable board summary. Existing persisted layouts must gain new panels without resetting the user's saved positions.
+
+## 2026-08-15 — Todos is board-only with optimistic persistence
+
+**Status:** Accepted; supersedes the separate-page expectation for Todos in "New features are board-first by default."
+
+**Context:** Todos only needs add, check/reopen, and delete. A separate page duplicated a workflow that fits comfortably in its resizable board panel. Waiting for each Turso write plus a full home-page revalidation also made simple checklist actions feel slow because the board refetched Gmail and Google Calendar.
+
+**Decision:** Keep the complete Todos workflow in its board panel with no `/todos` page. Apply changes immediately to local panel state, persist them asynchronously through server actions, and roll back with an error state on failure. Do not revalidate the whole board after todo writes.
+
+**Consequences:** Todo interaction feels immediate while retaining durable Turso storage and failure visibility. A fresh page load remains the source-of-truth reconciliation. Other features still receive board panels by default, but only receive separate pages when their interaction depth requires one.

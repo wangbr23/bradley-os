@@ -25,4 +25,10 @@ export const todos = sqliteTable("todos", {
   completedAt: integer("completed_at", { mode: "timestamp" }),
 });
 
+export const layouts = sqliteTable("layouts", {
+  id: text("id").primaryKey(), // constant, e.g. "home"
+  layoutJson: text("layout_json", { mode: "json" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
 // Calendar events are not stored here — Google Calendar is the system of record.

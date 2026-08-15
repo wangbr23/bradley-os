@@ -1,0 +1,397 @@
+<title>bradley-os board</title>
+<style>
+  :root {
+    --background: #ffffff;
+    --foreground: #1a1a18;
+    --muted: #6b6459;
+    --border: #dedad1;
+    --accent: #9c6a0e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: #0e0e10;
+      --foreground: #f2eee6;
+      --muted: #a69c8c;
+      --border: #34302a;
+      --accent: #e0a94a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --background: #0e0e10;
+    --foreground: #f2eee6;
+    --muted: #a69c8c;
+    --border: #34302a;
+    --accent: #e0a94a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--background);
+    background-image: radial-gradient(var(--border) 1px, transparent 1.5px);
+    background-size: 22px 22px;
+    color: var(--foreground);
+    font-family: "Newsreader", Charter, Georgia, serif;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  .page { max-width: 1040px; margin: 0 auto; }
+
+  /* --- top header, matches the live app/page.tsx pattern --- */
+  .top { max-width: 24rem; margin: 0 0 2.5rem; }
+  .ledger-rule { border-top: 1px solid var(--border); }
+  .eyebrow {
+    margin-top: 0.75rem;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .top h1 {
+    margin: 1rem 0 0;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* --- ink-action, ported verbatim from app/globals.css --- */
+  .ink-action {
+    position: relative;
+    display: inline-block;
+    border: none;
+    background: none;
+    padding: 0 0 0.3rem;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--foreground);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .ink-action::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: height 150ms linear, opacity 150ms linear;
+  }
+  .ink-action:hover::after { height: 0.5rem; opacity: 0.3; }
+
+  /* --- board: panels as full-bordered index cards resting on the dotted desk --- */
+  .board {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "calendar notes"
+      "inbox    notes";
+    gap: 1.75rem;
+  }
+
+  .panel {
+    position: relative;
+    background: var(--background);
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.4rem 1.4rem;
+    overflow: hidden;
+  }
+  #panel-calendar { grid-area: calendar; }
+  #panel-inbox    { grid-area: inbox; }
+  #panel-notes    { grid-area: notes; display: flex; flex-direction: column; }
+
+  .watermark {
+    position: absolute;
+    top: -0.4rem;
+    right: 0.5rem;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 4rem;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.08;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .panel-header {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.6rem;
+    cursor: grab;
+    transition: border-bottom-width 150ms linear, border-bottom-color 150ms linear;
+  }
+  .panel-header:hover { border-bottom-width: 3px; border-bottom-color: color-mix(in srgb, var(--accent) 45%, var(--border)); }
+
+  .panel-eyebrow {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+  }
+  .panel-title {
+    margin-top: 0.2rem;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
+  /* --- headline stat: the "this panel is a real instrument" anchor --- */
+  .stat {
+    position: relative;
+    margin-top: 0.9rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+  }
+  .stat-num {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+  .stat-label {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+
+  /* --- week dot-strip, calendar panel only --- */
+  .week-strip { position: relative; display: flex; gap: 0.5rem; margin-top: 1rem; }
+  .wd { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--border); }
+  .wd.busy { background: var(--accent); border-color: var(--accent); }
+  .wd.today { outline: 1px solid var(--foreground); outline-offset: 2px; }
+
+  .panel-rows { position: relative; margin-top: 1rem; display: flex; flex-direction: column; }
+  #panel-notes .panel-rows { flex: 1; }
+  .panel-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+    align-items: baseline;
+    padding: 0.55rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .panel-row:first-child { border-top: none; }
+  .row-main { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.82rem; }
+  .row-main .glyph { color: var(--accent); margin-right: 0.35rem; }
+  .row-sub { color: var(--muted); font-size: 0.78rem; }
+  .row-time {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .panel-footer { position: relative; margin-top: 1.1rem; }
+
+  /* --- resize tick, inside the card's own padding --- */
+  .resize-tick {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: 10px;
+    height: 10px;
+    border-right: 1px solid var(--muted);
+    border-bottom: 1px solid var(--muted);
+    cursor: nwse-resize;
+    transition: border-color 150ms linear;
+  }
+  .panel:hover .resize-tick { border-color: var(--accent); }
+
+  /* --- legend, matches app/sign-in/page.tsx --- */
+  .legend {
+    margin-top: 2.5rem;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  .legend span { color: var(--accent); }
+
+  /* --- interaction-state callout --- */
+  .states { margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border); }
+  .states-label {
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+  .states-row { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  @media (max-width: 640px) {
+    .board { grid-template-columns: 1fr; grid-template-areas: "calendar" "inbox" "notes"; }
+    .states-row { grid-template-columns: 1fr; gap: 2rem; }
+  }
+  .state-demo { position: relative; border: 1px dashed var(--border); padding: 1rem; min-height: 7.5rem; }
+  .state-caption { font-family: ui-monospace, "SF Mono", monospace; font-size: 0.68rem; color: var(--muted); margin-top: 0.6rem; }
+
+  .drag-ghost { position: absolute; inset: 0.75rem; border: 1px dashed var(--border); }
+  .drag-live {
+    position: absolute;
+    inset: 1.1rem;
+    background: var(--background);
+    border: 1px solid var(--border);
+    padding: 0.7rem 0.8rem;
+  }
+  .drag-live .panel-header { border-bottom-width: 3px; border-bottom-color: color-mix(in srgb, var(--accent) 45%, var(--border)); cursor: grabbing; }
+  .drag-live .panel-title { font-size: 0.78rem; }
+  .drag-live .panel-eyebrow { font-size: 0.58rem; }
+
+  .resize-demo { display: flex; flex-direction: column; }
+  .resize-demo .resize-tick { position: static; align-self: flex-end; margin-top: auto; border-color: var(--accent); }
+</style>
+
+<div class="page">
+  <div class="top">
+    <div class="ledger-rule"></div>
+    <p class="eyebrow">○ Signed in</p>
+    <h1>bradley-os</h1>
+  </div>
+
+  <div class="board">
+    <section class="panel" id="panel-calendar">
+      <span class="watermark" aria-hidden="true">○</span>
+      <div class="panel-header">
+        <div>
+          <p class="panel-eyebrow">Today, Aug 15</p>
+          <p class="panel-title">Calendar ○</p>
+        </div>
+      </div>
+      <div class="stat">
+        <span class="stat-num">9:00</span>
+        <span class="stat-label">next — Team sync</span>
+      </div>
+      <div class="week-strip" aria-hidden="true">
+        <span class="wd busy" title="Mon"></span>
+        <span class="wd busy" title="Tue"></span>
+        <span class="wd today busy" title="Wed"></span>
+        <span class="wd" title="Thu"></span>
+        <span class="wd busy" title="Fri"></span>
+        <span class="wd" title="Sat"></span>
+        <span class="wd" title="Sun"></span>
+      </div>
+      <div class="panel-rows">
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">○</span>Lunch with Sam</p>
+          <p class="row-time">12:30 PM</p>
+        </div>
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">○</span>Dentist</p>
+          <p class="row-time">3:00 PM</p>
+        </div>
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">○</span>Board game night</p>
+          <p class="row-time">7:00 PM</p>
+        </div>
+      </div>
+      <p class="panel-footer"><a class="ink-action" href="#">View week →</a></p>
+      <div class="resize-tick"></div>
+    </section>
+
+    <section class="panel" id="panel-inbox">
+      <span class="watermark" aria-hidden="true">•</span>
+      <div class="panel-header">
+        <div>
+          <p class="panel-eyebrow">Last 24h</p>
+          <p class="panel-title">Inbox •</p>
+        </div>
+      </div>
+      <div class="stat">
+        <span class="stat-num">3</span>
+        <span class="stat-label">unread</span>
+      </div>
+      <div class="panel-rows">
+        <div class="panel-row">
+          <div class="row-main"><span class="glyph">•</span>Turso <span class="row-sub">— Weekly usage summary</span></div>
+          <p class="row-time">8:02 AM</p>
+        </div>
+        <div class="panel-row">
+          <div class="row-main"><span class="glyph">•</span>GitHub <span class="row-sub">— New workflow run</span></div>
+          <p class="row-time">7:45 AM</p>
+        </div>
+        <div class="panel-row">
+          <div class="row-main"><span class="glyph">•</span>Sam Rivera <span class="row-sub">— Re: Saturday?</span></div>
+          <p class="row-time">7:10 AM</p>
+        </div>
+      </div>
+      <p class="panel-footer"><a class="ink-action" href="#">View all →</a></p>
+      <div class="resize-tick"></div>
+    </section>
+
+    <section class="panel" id="panel-notes">
+      <span class="watermark" aria-hidden="true">–</span>
+      <div class="panel-header">
+        <div>
+          <p class="panel-eyebrow">Recently edited</p>
+          <p class="panel-title">Notes –</p>
+        </div>
+      </div>
+      <div class="stat">
+        <span class="stat-num">7</span>
+        <span class="stat-label">notes</span>
+      </div>
+      <div class="panel-rows">
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">–</span>Board layout ideas</p>
+          <p class="row-time">2h ago</p>
+        </div>
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">–</span>v1 launch checklist</p>
+          <p class="row-time">1d ago</p>
+        </div>
+        <div class="panel-row">
+          <p class="row-main"><span class="glyph">–</span>Reading list</p>
+          <p class="row-time">3d ago</p>
+        </div>
+      </div>
+      <p class="panel-footer">
+        <a class="ink-action" href="#">View all</a>
+        &nbsp;&nbsp;
+        <a class="ink-action" href="#">New note</a>
+      </p>
+      <div class="resize-tick"></div>
+    </section>
+  </div>
+
+  <p class="legend">· <span>task</span> &nbsp;&nbsp; ○ <span>event</span> &nbsp;&nbsp; – <span>note</span></p>
+
+  <div class="states">
+    <p class="states-label">Interaction states (not real drag/resize here — this page is a static mock)</p>
+    <div class="states-row">
+      <div>
+        <div class="state-demo">
+          <div class="drag-ghost"></div>
+          <div class="drag-live">
+            <div class="panel-header">
+              <div>
+                <p class="panel-eyebrow">Last 24h</p>
+                <p class="panel-title">Inbox •</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="state-caption">Drag — the whole header bar is the handle; its rule thickens toward the accent while dragging, dashed card marks the drop target.</p>
+      </div>
+      <div>
+        <div class="state-demo resize-demo">
+          <p class="row-main" style="font-size:0.82rem"><span class="glyph">○</span>Team sync</p>
+          <p class="row-time" style="margin-top:0.4rem">9:00 AM</p>
+          <div class="resize-tick"></div>
+        </div>
+        <p class="state-caption">Resize — a small corner tick, not a dot cluster (which would disappear into the page's own dot grid).</p>
+      </div>
+    </div>
+  </div>
+</div>

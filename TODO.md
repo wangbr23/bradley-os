@@ -12,14 +12,15 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 
 ## v0 — first end-to-end slice
 - [x] Auth — sign in with Google, single-email allowlist
-- [x] Inbox digest — IMAP fetch, unread/24h list, no styling polish
-- [ ] Calendar — read Google Calendar, list view only, no drag yet
-- [ ] Notes — flat list + Tiptap editor, no diagrams yet
-- [ ] Todos — flat checklist
+- [x] Inbox digest — IMAP fetch, Primary unread/24h list, no styling polish
+- [x] Calendar — read Google Calendar, list view only, no drag yet
+- [x] Notes — flat list + Tiptap editor, no diagrams yet
+- [ ] Todos — board-only flat checklist (implemented; browser verification pending)
 
 ## v1 — design spec scope
-- [ ] Today dashboard — unify digest, calendar, notes, todos into one home screen
-- [ ] Calendar — drag-to-create / drag-to-resize time-blocking (FullCalendar interaction plugin)
+- [x] Today dashboard — Calendar/Inbox/Notes/Todos as a drag-to-rearrange, resizable board on the home screen with persisted layout — see `docs/designs/2026-08-15-board-home-screen.md`.
+- [x] Calendar — replace the chronological list with a Pacific-time FullCalendar week grid
+- [ ] Calendar interactions — drag-to-create / drag-to-move / drag-to-resize time-blocking and persist changes to Google Calendar
 - [ ] Diagrams — Excalidraw, embeddable inline in notes
 - [ ] Full-text search across notes
 - [ ] Visual design system applied throughout (palette, type, motion, empty states)
