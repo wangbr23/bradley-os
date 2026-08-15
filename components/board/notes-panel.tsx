@@ -60,10 +60,10 @@ export const NotesPanel = forwardRef<HTMLDivElement, NotesPanelProps>(
           ) : (
             notes.map((note) => (
               <div className="panel-row" key={note.id}>
-                <p className="row-main">
+                <Link href={`/notes/${note.id}`} className="row-main panel-row-link">
                   <span className="glyph">–</span>
                   {note.title}
-                </p>
+                </Link>
                 <p className="row-time">{formatRelativeTime(note.updatedAt, now)}</p>
               </div>
             ))
