@@ -1,0 +1,10 @@
+.section { margin-bottom: 2.5rem; }
+.status, .error, .remove, .loading { font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.025em; text-transform: uppercase; }
+.status, .loading { color: var(--muted); }
+.error { color: #b91c1c; }
+.actions { display: flex; align-items: center; justify-content: flex-end; gap: 1rem; padding-top: 0.5rem; }
+.remove { color: var(--muted); cursor: pointer; }
+.remove:hover { color: #b91c1c; }
+.canvas { height: 32rem; }
+.loading { padding: 1rem; }
+@media (max-width: 640px) { .canvas { height: 26rem; } }

@@ -121,3 +121,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Use semantic classes from colocated CSS Modules for page and component presentation. Keep `app/globals.css` for design tokens, resets, shared primitives, and selectors required by third-party integrations.
 
 **Consequences:** JSX emphasizes structure and behavior, while visual changes live in dedicated stylesheets. Shared board and FullCalendar selectors may remain global where their libraries require stable class names.
+
+## 2026-08-15 — Keep one embedded diagram per note initially
+
+**Status:** Accepted
+
+**Context:** The schema permits multiple diagrams per note, but fully positioning arbitrary diagram blocks inside Tiptap would require a custom node extension, selection behavior, and more complex lifecycle management before the core drawing workflow has been validated.
+
+**Decision:** Start with one note-owned Excalidraw canvas embedded directly after the note body. Persist its scene in the existing `diagrams` table and save edits with a short debounce.
+
+**Consequences:** Notes gain a durable inline drawing surface with minimal editor complexity. Multiple diagrams and arbitrary placement within prose remain possible later if actual use demonstrates that need.

@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import { Newsreader, Geist_Mono } from "next/font/google";
+import { Fraunces, IBM_Plex_Mono } from "next/font/google";
+import "@excalidraw/excalidraw/index.css";
 import "./globals.css";
 
-const newsreader = Newsreader({
-  variable: "--font-newsreader",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  weight: "variable",
+  style: ["normal", "italic"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
   subsets: ["latin"],
+  weight: ["400", "700"],
 });
 
 export const metadata: Metadata = {
@@ -21,7 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${newsreader.variable} ${geistMono.variable}`}
+      className={`${fraunces.variable} ${ibmPlexMono.variable}`}
     >
       <body>{children}</body>
     </html>

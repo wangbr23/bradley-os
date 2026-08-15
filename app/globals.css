@@ -14,8 +14,8 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
-  --font-serif: var(--font-newsreader);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-fraunces);
+  --font-mono: var(--font-ibm-plex-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -37,6 +37,11 @@ body {
   background-size: 22px 22px;
   color: var(--foreground);
   font-family: var(--font-serif), Georgia, serif;
+  /* Fraunces variable axes: soft, slightly irregular letterforms read as
+     handmade rather than typeset. opsz stays low here for legibility —
+     it's bumped up only where the serif renders at real headline size
+     (components/notes/note-editor.module.css .title). */
+  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 30;
 }
 
 html {

@@ -62,9 +62,6 @@ export default async function Home() {
             </form>
           </div>
           <h1 className={styles.title}>bradley-os</h1>
-          <p className={styles.welcome}>
-            – Welcome, {session?.user?.name ?? session?.user?.email}.
-          </p>
         </div>
 
         <div className={styles.board}>

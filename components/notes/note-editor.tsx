@@ -7,16 +7,20 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 import { deleteNote, saveNote } from "@/app/notes/actions";
+import type { NoteDiagram } from "@/lib/diagrams/types";
+import { NoteDiagramEditor } from "./note-diagram-editor";
 import styles from "./note-editor.module.css";
 
 interface NoteEditorProps {
   id: string;
   initialTitle: string;
   initialBody: JSONContent;
+  initialDiagram: NoteDiagram;
 }
 
-export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
+export function NoteEditor({ id, initialTitle, initialBody, initialDiagram }: NoteEditorProps) {
   const router = useRouter();
+  const [mode, setMode] = useState<"notes" | "diagram">("notes");
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState<JSONContent>(initialBody);
   const [dirty, setDirty] = useState(false);
@@ -28,11 +32,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
     extensions: [StarterKit],
     content: initialBody,
     immediatelyRender: false,
-    editorProps: {
-      attributes: {
-        class: styles.prose,
-      },
-    },
+    editorProps: { attributes: { class: styles.prose } },
     onUpdate({ editor: currentEditor }) {
       setBody(currentEditor.getJSON());
       setDirty(true);
@@ -57,14 +57,9 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
     startDeleting(async () => {
       try {
         await deleteNote(id);
-        setDeleteError(false);
       } catch (error) {
-        // deleteNote redirects on success, which Next.js implements by
-        // throwing a special error — let that one through, it's not a failure.
         const digest = (error as { digest?: string } | null)?.digest;
-        if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
-          throw error;
-        }
+        if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) throw error;
         setDeleteError(true);
       }
     });
@@ -72,84 +67,64 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
 
   return (
     <article className={styles.editor}>
-      <input
-        value={title}
-        onChange={(event) => {
-          setTitle(event.target.value);
-          setDirty(true);
-        }}
-        aria-label="Note title"
-        placeholder="Untitled note"
-        className={styles.title}
-      />
-
-      <div className={styles.toolbar}>
-        <button
-          type="button"
-          onClick={() => editor?.chain().focus().toggleBold().run()}
-          aria-pressed={editor?.isActive("bold") ?? false}
-          className="ink-action"
-        >
-          Bold
-        </button>
-        <button
-          type="button"
-          onClick={() => editor?.chain().focus().toggleItalic().run()}
-          aria-pressed={editor?.isActive("italic") ?? false}
-          className="ink-action"
-        >
-          Italic
-        </button>
-        <button
-          type="button"
-          onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-          aria-pressed={editor?.isActive("heading", { level: 2 }) ?? false}
-          className="ink-action"
-        >
-          Heading
-        </button>
-        <button
-          type="button"
-          onClick={() => editor?.chain().focus().toggleBulletList().run()}
-          aria-pressed={editor?.isActive("bulletList") ?? false}
-          className="ink-action"
-        >
-          List
-        </button>
-        <span className={styles.status}>
-          {saveError
-            ? "Save failed"
-            : isSaving
-              ? "Saving…"
-              : dirty
-                ? "Unsaved"
-                : "Saved"}
-        </span>
-      </div>
-
-      <EditorContent editor={editor} className={styles.content} />
-
-      <footer className={styles.footer}>
+      <div className={styles.titleRow}>
+        <input
+          value={title}
+          onChange={(event) => {
+            setTitle(event.target.value);
+            setDirty(true);
+          }}
+          aria-label="Note title"
+          placeholder="Untitled note"
+          className={styles.title}
+        />
         <button
           type="button"
           onClick={handleSave}
           disabled={isSaving || !dirty}
           className={`ink-action ${styles.disabled}`}
         >
-          Save note
+          {saveError ? "Save failed" : isSaving ? "Saving…" : dirty ? "Save note" : "Saved"}
         </button>
-        <span className={styles.deleteGroup}>
-          {deleteError ? (
-            <span className={styles.deleteError}>
-              Delete failed
-            </span>
-          ) : null}
+      </div>
+
+      <div className={styles.controls}>
+        {mode === "notes" ? (
+          <div className={styles.toolbar}>
+            <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()} className="ink-action">Bold</button>
+            <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()} className="ink-action">Italic</button>
+            <button type="button" onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()} className="ink-action">Heading</button>
+            <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()} className="ink-action">List</button>
+          </div>
+        ) : null}
+        <div className={styles.modeSwitch}>
+          <span>Notes</span>
           <button
             type="button"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className={styles.deleteButton}
+            role="switch"
+            aria-label="Switch between notes and diagram"
+            aria-checked={mode === "diagram"}
+            className={styles.switch}
+            data-active={mode === "diagram"}
+            onClick={() => setMode((current) => (current === "notes" ? "diagram" : "notes"))}
           >
+            <span className={styles.switchThumb} />
+          </button>
+          <span>Diagram</span>
+        </div>
+      </div>
+
+      {mode === "notes" ? (
+        <EditorContent editor={editor} className={styles.content} />
+      ) : (
+        <NoteDiagramEditor noteId={id} diagram={initialDiagram} />
+      )}
+
+      <footer className={styles.footer}>
+        <p className={styles.hint}>This note keeps its writing and diagram together.</p>
+        <span className={styles.deleteGroup}>
+          {deleteError ? <span className={styles.deleteError}>Delete failed</span> : null}
+          <button type="button" onClick={handleDelete} disabled={isDeleting} className={styles.deleteButton}>
             {isDeleting ? "Deleting…" : "Delete note"}
           </button>
         </span>

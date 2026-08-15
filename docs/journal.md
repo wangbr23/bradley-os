@@ -99,3 +99,9 @@ Stopped truncating the home-board inbox digest to three messages and passed the 
 Replaced the long Tailwind utility strings in the home, sign-in, inbox, calendar, notes-list, note-detail, and note-editor JSX with semantic classes from colocated CSS Modules. Moved the remaining small board-only utility styles into a board module and moved root layout sizing and font smoothing into global element rules. Existing shared semantic hooks such as `ink-action`, `panel-row`, and FullCalendar integration classes remain intentionally global.
 
 Removed the obsolete global Tiptap rules after moving editor prose styling beside `NoteEditor`, and recorded the CSS organization convention in `AGENTS.md`. Lint, TypeScript, the diff whitespace check, and the webpack production build pass.
+
+## 2026-08-15 — Embedded Excalidraw diagrams implemented in Notes
+
+Added one note-owned Excalidraw canvas directly below the Tiptap body. Notes without a canvas show an "Insert diagram" action; creating it uses the existing `diagrams` table, and subsequent scene changes save to Turso after a 700 ms debounce with saving/error status. Existing scenes load with the note, diagrams can be removed independently, and deleting a note now removes its linked diagram first.
+
+Kept Excalidraw browser-only through a dynamic client import and stored a deliberately small JSON scene shape: elements, binary files, canvas background, and grid size. Lint, generated route types, TypeScript, and the webpack production build pass. Browser verification of insert/draw/reload/remove remains before the TODO is marked complete.
