@@ -1,0 +1,611 @@
+<title>bradley-os</title>
+<style>
+  :root{
+    --bg: #EEEBE4;
+    --surface: #FBF9F5;
+    --surface-2: #F3F0E9;
+    --text: #201D18;
+    --text-muted: #6B6459;
+    --border: #DEDAD1;
+    --accent: #9C6A0E;
+    --accent-text: #7C4E08;
+    --accent-contrast: #FFFBF2;
+    --ok: #3F6B5B;
+    --shadow-none: none;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #171511;
+      --surface: #201D18;
+      --surface-2: #251F17;
+      --text: #F2EEE6;
+      --text-muted: #A69C8C;
+      --border: #34302A;
+      --accent: #E0A94A;
+      --accent-text: #E0A94A;
+      --accent-contrast: #1B1408;
+      --ok: #7FA79B;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #171511;
+    --surface: #201D18;
+    --surface-2: #251F17;
+    --text: #F2EEE6;
+    --text-muted: #A69C8C;
+    --border: #34302A;
+    --accent: #E0A94A;
+    --accent-text: #E0A94A;
+    --accent-contrast: #1B1408;
+    --ok: #7FA79B;
+  }
+
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior: auto; }
+    *{ transition: none !important; animation: none !important; }
+  }
+
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Charter", "Iowan Old Style", Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .display{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, system-ui, sans-serif;
+  }
+  .mono{
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+
+  a{ color: var(--accent-text); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible{
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .page{
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 4rem 2rem 8rem;
+    display: grid;
+    grid-template-columns: 200px minmax(0,1fr);
+    gap: 4rem;
+    align-items: start;
+  }
+  @media (max-width: 880px){
+    .page{ grid-template-columns: 1fr; gap: 2rem; padding: 2rem 1.25rem 5rem; }
+    .rail{ position: static; order: -1; }
+  }
+
+  .rail{
+    position: sticky;
+    top: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .rail .tag{
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .rail a{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-size: 0.86rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 0.15rem 0;
+    border-left: 2px solid transparent;
+    padding-left: 0.75rem;
+    transition: color 120ms linear, border-color 120ms linear;
+  }
+  .rail a:hover{ color: var(--text); border-left-color: var(--border); }
+  .rail a.current{ color: var(--accent-text); border-left-color: var(--accent); }
+
+  main{ min-width: 0; }
+
+  .hero{
+    margin-bottom: 4.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero .eyebrow{
+    font-size: 0.72rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent-text);
+    margin-bottom: 1rem;
+  }
+  .hero h1{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2.2rem, 5vw, 3.1rem);
+    letter-spacing: -0.01em;
+    margin: 0 0 0.9rem;
+    text-wrap: balance;
+  }
+  .hero p.lede{
+    max-width: 62ch;
+    font-size: 1.15rem;
+    color: var(--text-muted);
+    margin: 0 0 1.5rem;
+  }
+  .hero .meta{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .hero .meta b{ color: var(--text); font-weight: 600; }
+
+  section{ margin-bottom: 4.5rem; scroll-margin-top: 2rem; }
+  section > .kicker{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+  section > h2{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin: 0 0 1.4rem;
+    text-wrap: balance;
+  }
+  section > p.intro{
+    max-width: 68ch;
+    color: var(--text-muted);
+    margin: -0.6rem 0 1.8rem;
+  }
+
+  .measure{ max-width: 68ch; }
+  .measure p{ margin: 0 0 1rem; }
+
+  /* feature list */
+  .feature{
+    display: grid;
+    grid-template-columns: 11rem minmax(0,1fr);
+    gap: 0.4rem 1.5rem;
+    padding: 1.25rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .feature:last-child{ border-bottom: 1px solid var(--border); }
+  @media (max-width: 640px){
+    .feature{ grid-template-columns: 1fr; gap: 0.35rem; }
+  }
+  .feature dt{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-weight: 700;
+    font-size: 0.98rem;
+  }
+  .feature dd{ margin: 0; color: var(--text-muted); max-width: 54ch; }
+  .feature dd .status{
+    display: inline-block;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
+    color: var(--accent-text);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    margin-top: 0.5rem;
+  }
+
+  /* stack list */
+  .stack{ border-top: 1px solid var(--border); }
+  .stack-row{
+    display: grid;
+    grid-template-columns: 9.5rem minmax(0,1fr);
+    gap: 0.3rem 1.5rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 640px){
+    .stack-row{ grid-template-columns: 1fr; }
+  }
+  .stack-row dt{
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--accent-text);
+    padding-top: 0.1rem;
+  }
+  .stack-row dd{ margin: 0; color: var(--text); max-width: 58ch; }
+  .stack-row dd small{ display:block; color: var(--text-muted); margin-top:0.25rem; font-size: 0.86em; }
+
+  code.field, code.env{
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.85em;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 0.05rem 0.35rem;
+    border-radius: 3px;
+  }
+
+  .schema{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1.1rem 1.3rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+  }
+  .schema pre{
+    margin: 0;
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre;
+  }
+  .schema pre .tbl{ color: var(--accent-text); }
+  .schema pre .fk{ color: var(--text-muted); font-style: italic; }
+
+  /* design system swatches */
+  .swatches{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .swatch{ display: flex; flex-direction: column; gap: 0.5rem; }
+  .swatch .chip{
+    height: 3.4rem;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+  .swatch .label{ font-size: 0.78rem; }
+  .swatch .label b{ display:block; font-weight: 600; }
+  .swatch .label span{
+    font-family: ui-monospace, "SF Mono", monospace;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+  }
+
+  .type-sample{
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--surface);
+    padding: 1.6rem 1.8rem;
+    margin: 1.5rem 0 2rem;
+    display: grid;
+    gap: 1.1rem;
+  }
+  .type-sample .role{
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+  .type-sample .display-demo{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+  }
+  .type-sample .body-demo{
+    font-family: "Charter", "Iowan Old Style", Georgia, serif;
+    font-size: 1.05rem;
+    max-width: 46ch;
+    color: var(--text);
+  }
+  .type-sample .mono-demo{
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.88rem;
+    color: var(--accent-text);
+  }
+
+  .detail-list{ padding: 0; margin: 1.2rem 0 0; list-style: none; }
+  .detail-list li{
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--border);
+    max-width: 62ch;
+  }
+  .detail-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .detail-list b{ display: block; margin-bottom: 0.15rem; }
+  .detail-list span{ color: var(--text-muted); }
+
+  /* risks */
+  .risk{
+    padding: 1.1rem 1.3rem;
+    border-left: 2px solid var(--accent);
+    background: var(--surface);
+    margin-bottom: 1rem;
+    max-width: 68ch;
+  }
+  .risk b{ display: block; margin-bottom: 0.3rem; }
+  .risk p{ margin: 0; color: var(--text-muted); }
+
+  /* roadmap */
+  .phase{ margin-bottom: 2.2rem; }
+  .phase .phase-head{
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+  }
+  .phase .phase-head .n{
+    font-family: ui-monospace, "SF Mono", monospace;
+    font-size: 0.82rem;
+    color: var(--accent-text);
+  }
+  .phase .phase-head h3{
+    font-family: "Avenir Next", "Century Gothic", Futura, ui-sans-serif, sans-serif;
+    font-size: 1.05rem;
+    margin: 0;
+  }
+  .phase .phase-head .note{ color: var(--text-muted); font-size: 0.85rem; }
+  ol.steps{ margin: 0; padding-left: 1.4rem; max-width: 60ch; }
+  ol.steps li{ margin-bottom: 0.45rem; }
+  ul.deferred{ margin: 0; padding-left: 1.2rem; max-width: 60ch; color: var(--text-muted); }
+  ul.deferred li{ margin-bottom: 0.4rem; }
+
+  .next-list{ list-style: none; padding: 0; margin: 0; max-width: 62ch; }
+  .next-list li{
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.7rem 0;
+    border-top: 1px solid var(--border);
+  }
+  .next-list li:last-child{ border-bottom: 1px solid var(--border); }
+  .next-list .box{
+    flex: none;
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-top: 0.2rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 2px;
+  }
+
+  footer{
+    margin-top: 5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+</style>
+
+<div class="page">
+  <nav class="rail" aria-label="Sections">
+    <div class="tag display">bradley-os</div>
+    <a href="#scope">Scope</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#design">Design system</a>
+    <a href="#risks">Risks</a>
+    <a href="#roadmap">Roadmap</a>
+    <a href="#next">Next steps</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow display">Design spec — v1</div>
+      <h1>bradley-os</h1>
+      <p class="lede">A single-user web app that replaces three browser tabs — mail, calendar, notes — with one daily-driver: what's unread, what's next, what you were thinking.</p>
+      <div class="meta mono">
+        <span>Owner: <b>brwang48198@gmail.com</b></span>
+        <span>Status: <b>Approved for build</b></span>
+        <span>Drafted: <b>2026-08-15</b></span>
+      </div>
+    </header>
+
+    <section id="scope">
+      <div class="kicker">Scope</div>
+      <h2>What v1 actually does</h2>
+      <p class="intro">Six surfaces, one app. Everything here is either explicitly what you asked for, or the single addition that turned three separate views into something that actually gets used daily.</p>
+
+      <dl class="feature">
+        <dt>Today</dt>
+        <dd>Home screen on login: unread digest, today's/this week's events, pinned notes, and open todos in one place. <span class="status">new — closes the loop</span></dd>
+      </dl>
+      <dl class="feature">
+        <dt>Inbox digest</dt>
+        <dd>Read-only list of unread mail from the last 24 hours — sender, subject, snippet. No reply, no archive, no mail actions. Signal, not a mail client.</dd>
+      </dl>
+      <dl class="feature">
+        <dt>Calendar</dt>
+        <dd>Week view backed by Google Calendar. Click-drag to create a block, drag the edge to resize, current-time line. bradley-os authors events; Google Calendar stays the only source of truth.</dd>
+      </dl>
+      <dl class="feature">
+        <dt>Notes</dt>
+        <dd>Persistent, structured notes (rich text, not plain text) with full-text search. Diagrams embed inline as a block inside a note, or stand alone.</dd>
+      </dl>
+      <dl class="feature">
+        <dt>Diagrams</dt>
+        <dd>Freeform Excalidraw canvases for architecture sketches and plans — hand-drawn aesthetic, not a corporate flowchart tool.</dd>
+      </dl>
+      <dl class="feature">
+        <dt>Todos</dt>
+        <dd>A flat checklist — add, check, delete. No projects, no priorities, no due dates. <span class="status">new — smallest possible connective tissue</span></dd>
+      </dl>
+    </section>
+
+    <section id="architecture">
+      <div class="kicker">Architecture</div>
+      <h2>How it's built</h2>
+      <p class="intro">Optimized for one person maintaining this for years, with an AI assistant re-deriving context each session — fewer moving parts wins over architectural purity every time.</p>
+
+      <dl class="stack">
+        <div class="stack-row">
+          <dt>runtime</dt>
+          <dd>Next.js (App Router) + TypeScript, one deployable app<small>Route Handlers and Server Actions carry the backend — no separate API service, no CORS.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>styling</dt>
+          <dd>Tailwind CSS + Base UI<small>Headless primitives copied into the repo (the shadcn pattern) — every visual token is ours, nothing inherited from a default theme.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>data</dt>
+          <dd>Turso (hosted libSQL/SQLite) via Drizzle ORM<small>Vercel functions have no durable local disk; Turso keeps "it's still just SQLite" true while being serverless-safe.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>auth</dt>
+          <dd>Auth.js, Google provider, single-email allowlist<small>The sign-in callback rejects every email but <code class="field">OWNER_EMAIL</code>. Login and the Calendar OAuth grant share one consent screen.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>calendar</dt>
+          <dd>Google Calendar API (googleapis), read/write proxy<small>No local copy of events, ever — bradley-os never becomes a second source of truth that drifts from what your phone shows.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>email</dt>
+          <dd>Gmail via IMAP (imapflow) + a Google App Password<small>Not the Gmail REST API — see Risks. <code class="field">SEARCH UNSEEN SINCE</code> against INBOX, pulled on load.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>calendar ui</dt>
+          <dd>FullCalendar — timeGrid + interaction plugin<small>The only one of three compared libraries with free, out-of-the-box drag-to-create and drag-to-resize.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>diagrams</dt>
+          <dd>Excalidraw (<code class="field">@excalidraw/excalidraw</code>)<small>MIT-licensed, free to embed forever. tldraw's SDK requires a paid license past a 100-day trial — not a real option for this.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>notes editor</dt>
+          <dd>Tiptap (ProseMirror, headless)<small>Structured enough to embed a diagram or a calendar-event reference as an inline block, not just flat text.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>state</dt>
+          <dd>Zustand or Jotai<small>Lightweight client state — one user, no cross-client sync complexity to design around.</small></dd>
+        </div>
+        <div class="stack-row">
+          <dt>hosting</dt>
+          <dd>Vercel (app) + Turso (data)<small>No volumes, no backup jobs, no container builds — the entire ops surface is a handful of environment variables.</small></dd>
+        </div>
+      </dl>
+
+      <p class="kicker" style="margin-top:2.5rem;">Data model</p>
+      <div class="schema">
+        <pre><span class="tbl">notes</span>       (id, title, body_json, created_at, updated_at)
+<span class="tbl">diagrams</span>    (id, title, scene_json, <span class="fk">note_id → notes.id, nullable</span>, created_at, updated_at)
+<span class="tbl">todos</span>       (id, text, done, created_at, completed_at)
+
+<span class="fk">— calendar events are not stored here; Google Calendar is the system of record.</span></pre>
+      </div>
+
+      <p class="kicker" style="margin-top:2.5rem;">Secrets</p>
+      <p class="measure" style="color:var(--text-muted)">
+        <code class="env">GOOGLE_CLIENT_ID</code> · <code class="env">GOOGLE_CLIENT_SECRET</code> · <code class="env">AUTH_SECRET</code> · <code class="env">OWNER_EMAIL</code> · <code class="env">GMAIL_APP_PASSWORD</code> · <code class="env">TURSO_DATABASE_URL</code> · <code class="env">TURSO_AUTH_TOKEN</code> — six values, no vault needed at this scale, just never commit them.
+      </p>
+    </section>
+
+    <section id="design">
+      <div class="kicker">Design system</div>
+      <h2>What it should feel like</h2>
+      <p class="intro">The failure mode to design away from: default shadcn purple, Inter everywhere, glass cards on a gradient. The target is closer to Linear's restraint for the scanning surfaces and iA Writer's quiet for the writing surface — because those are genuinely two different cognitive modes, not one template stretched over three features.</p>
+
+      <p class="kicker" style="margin-top:2rem;">Starting palette</p>
+      <div class="swatches">
+        <div class="swatch"><div class="chip" style="background:#F7F5F1;border:1px solid #DEDAD1"></div><div class="label"><b>Paper</b><span>#F7F5F1</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#0E0E10"></div><div class="label"><b>Ink (dark bg)</b><span>#0E0E10</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#1A1A18"></div><div class="label"><b>Text (light)</b><span>#1A1A18</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#9C6A0E"></div><div class="label"><b>Accent — amber</b><span>#9C6A0E</span></div></div>
+        <div class="swatch"><div class="chip" style="background:#DEDAD1"></div><div class="label"><b>Hairline border</b><span>#DEDAD1</span></div></div>
+      </div>
+      <p class="measure" style="color:var(--text-muted); margin-top:-0.5rem;">One accent, used only for state — unread, today, active — never decoration. No gradients; depth comes from a 1px hairline, never a soft shadow. Deliberately not indigo/violet (the default-feeling post-shadcn accent) and not pure white or pure black.</p>
+
+      <p class="kicker" style="margin-top:2.5rem;">Type system</p>
+      <div class="type-sample">
+        <div><div class="role">UI chrome — Geist Sans / General Sans</div><div class="display-demo">Today · 3 unread · 2 events</div></div>
+        <div><div class="role">Notes — Newsreader / Charter</div><div class="body-demo">The notes surface should read like a page, not a panel — no toolbar competing with the words.</div></div>
+        <div><div class="role">Metadata — IBM Plex Mono / JetBrains Mono</div><div class="mono-demo">14:00–15:30 · 2 events · ⌘K</div></div>
+      </div>
+      <p class="measure" style="color:var(--text-muted)">No Inter. UI chrome gets a grotesk with more character; the notes editor switches to a serif built for reading — that switch alone is what makes the notes surface feel authored rather than templated. Mono is reserved for anything that's actually data: timestamps, durations, counts, shortcut hints.</p>
+
+      <p class="kicker" style="margin-top:2.5rem;">Layout</p>
+      <p class="measure">Persistent left rail — Today / Inbox / Calendar / Notes / Todos — with a single main panel that swaps per section, plus <span class="mono">⌘K</span> as a secondary accelerant for quick-capture, not the primary way to navigate. Inbox and Calendar share one dense, scanning density (compact rows, 8–12px padding); Notes deliberately breaks from it — wider margins, longer line-height — so the shift in density itself signals "this is the slow surface," without a label saying so.</p>
+
+      <p class="kicker" style="margin-top:2.5rem;">What makes it feel hand-designed</p>
+      <ul class="detail-list">
+        <li><b>Empty states have a voice.</b><span>"No unread mail. Go outside." — not a stock illustration and "Nothing here yet!"</span></li>
+        <li><b>Keyboard-native, visibly.</b><span>Every actionable row shows its shortcut on hover — this is a tool one person uses via keyboard, daily.</span></li>
+        <li><b>Motion is functional, not decorative.</b><span>120–150ms linear-ease on state changes only (checking a todo, completing a block) — never spring-everything.</span></li>
+        <li><b>No soft shadows.</b><span>A 1px hairline border does the work a blurred drop-shadow would otherwise fake.</span></li>
+      </ul>
+    </section>
+
+    <section id="risks">
+      <div class="kicker">Risks</div>
+      <h2>Where the estimate is fragile</h2>
+      <p class="intro">Four places where the feature as described is more work — or more brittle — than it sounds, flagged so none of them are a surprise mid-build.</p>
+
+      <div class="risk">
+        <b>Time-blocking is the largest single UI build.</b>
+        <p>FullCalendar's interaction plugin removes the "build a drag engine from scratch" problem, but reconciling optimistic local state against real Calendar API writes — latency, edits made from a phone mid-session — and always trusting Calendar's own RFC3339 timestamps over manual UTC math still takes real care.</p>
+      </div>
+      <div class="risk">
+        <b>Excalidraw is turnkey, embedding it isn't free.</b>
+        <p>Mounting it headlessly, debounced save-on-change into <code class="field">scene_json</code>, and correctly restoring a scene's embedded-image <code class="field">files</code> map on load are each small but real integration steps.</p>
+      </div>
+      <div class="risk">
+        <b>Calendar tokens still expire weekly in Testing mode.</b>
+        <p>Calendar is a "sensitive," not "restricted," scope — cheaper than Gmail's problem, but Testing-mode refresh tokens still expire every 7 days. Tolerable early with a manual re-consent; worth the one-time free verification review once the app is stable.</p>
+      </div>
+      <div class="risk">
+        <b>SQLite wants one process; Vercel gives you many.</b>
+        <p>A plain local <code class="field">.sqlite</code> file assumes a single long-lived process. Turso's client-server libSQL is specified instead of a raw file specifically to avoid that mismatch under serverless concurrency.</p>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="kicker">Roadmap</div>
+      <h2>Build order</h2>
+      <p class="intro">Real sequence — each phase depends on the one before it existing.</p>
+
+      <div class="phase">
+        <div class="phase-head"><span class="n">v0</span><h3 class="display">Something end-to-end, fast</h3><span class="note">— get every surface loading real data before polishing any of them</span></div>
+        <ol class="steps">
+          <li>Auth — sign in with Google, single-email allowlist.</li>
+          <li>Inbox digest — IMAP fetch, unread/24h list, no styling polish.</li>
+          <li>Calendar — read Google Calendar, list view only, no drag yet.</li>
+          <li>Notes — flat list + Tiptap editor, no diagrams yet.</li>
+          <li>Todos — flat checklist.</li>
+        </ol>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head"><span class="n">v1</span><h3 class="display">This document's scope</h3></div>
+        <ol class="steps">
+          <li>Today dashboard — unify all four surfaces into one home screen.</li>
+          <li>Calendar — drag-to-create / drag-to-resize time-blocking.</li>
+          <li>Diagrams — Excalidraw, embeddable inline in notes.</li>
+          <li>Full-text search across notes.</li>
+          <li>Visual design system applied throughout — palette, type, motion, empty states.</li>
+        </ol>
+      </div>
+
+      <div class="phase">
+        <div class="phase-head"><span class="n">v1.1</span><h3 class="display">Explicitly deferred</h3></div>
+        <ul class="deferred">
+          <li>Note ↔ calendar-event linking.</li>
+          <li>Multi-account email.</li>
+          <li>Calendar OAuth sensitive-scope verification (removes the weekly re-consent).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="next">
+      <div class="kicker">Next steps</div>
+      <h2>Before v0 starts</h2>
+      <ul class="next-list">
+        <li><span class="box"></span><span>Register a Google Cloud project; create an OAuth client with the Calendar scope.</span></li>
+        <li><span class="box"></span><span>Generate a Gmail App Password (myaccount.google.com/apppasswords, requires 2FA).</span></li>
+        <li><span class="box"></span><span>Provision a Turso database and auth token.</span></li>
+        <li><span class="box"></span><span>Scaffold the Next.js app; fill in <code class="field">AGENTS.md</code>'s Stack/Commands sections from this document.</span></li>
+        <li><span class="box"></span><span>Log this document's key calls in <code class="field">docs/decisions.md</code> once the build actually starts.</span></li>
+      </ul>
+    </section>
+
+    <footer class="mono">bradley-os · design spec v1 · 2026-08-15</footer>
+  </main>
+</div>
