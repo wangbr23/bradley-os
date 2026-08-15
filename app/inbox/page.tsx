@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import { getInboxDigest } from "@/lib/mail/inbox";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ function formatReceivedAt(date: Date) {
   return new Intl.DateTimeFormat("en-US", {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "America/Detroit",
+    timeZone: CALENDAR_TIME_ZONE,
   }).format(date);
 }
 

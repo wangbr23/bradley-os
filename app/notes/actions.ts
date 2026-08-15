@@ -5,14 +5,9 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
 import { db } from "@/lib/db/client";
 import { notes } from "@/lib/db/schema";
-
-async function requireOwner() {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
-}
+import { requireOwner } from "@/lib/auth/require-owner";
 
 export async function createNote() {
   await requireOwner();

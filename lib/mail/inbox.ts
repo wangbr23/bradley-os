@@ -4,6 +4,7 @@ import { ImapFlow, type FetchMessageObject } from "imapflow";
 
 const MAX_MESSAGES = 50;
 const SOURCE_PREVIEW_BYTES = 24_000;
+const DIGEST_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 export interface InboxDigestMessage {
   id: string;
@@ -107,7 +108,7 @@ export async function getInboxDigest(): Promise<InboxDigestMessage[]> {
       },
       { uid: true },
     );
-    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    const cutoff = Date.now() - DIGEST_WINDOW_MS;
 
     return messages
       .map(toDigestMessage)

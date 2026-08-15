@@ -20,6 +20,7 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
   const [body, setBody] = useState<JSONContent>(initialBody);
   const [dirty, setDirty] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
   const [isSaving, startSaving] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
   const editor = useEditor({
@@ -53,7 +54,18 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
   function handleDelete() {
     if (!window.confirm("Delete this note? This cannot be undone.")) return;
     startDeleting(async () => {
-      await deleteNote(id);
+      try {
+        await deleteNote(id);
+        setDeleteError(false);
+      } catch (error) {
+        // deleteNote redirects on success, which Next.js implements by
+        // throwing a special error — let that one through, it's not a failure.
+        const digest = (error as { digest?: string } | null)?.digest;
+        if (typeof digest === "string" && digest.startsWith("NEXT_REDIRECT")) {
+          throw error;
+        }
+        setDeleteError(true);
+      }
     });
   }
 
@@ -125,14 +137,21 @@ export function NoteEditor({ id, initialTitle, initialBody }: NoteEditorProps) {
         >
           Save note
         </button>
-        <button
-          type="button"
-          onClick={handleDelete}
-          disabled={isDeleting}
-          className="font-mono text-[11px] uppercase tracking-wide text-[color:var(--muted)] hover:text-red-700 disabled:opacity-40"
-        >
-          {isDeleting ? "Deleting…" : "Delete note"}
-        </button>
+        <span className="flex items-center gap-3">
+          {deleteError ? (
+            <span className="font-mono text-[11px] uppercase tracking-wide text-red-700">
+              Delete failed
+            </span>
+          ) : null}
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="font-mono text-[11px] uppercase tracking-wide text-[color:var(--muted)] hover:text-red-700 disabled:opacity-40"
+          >
+            {isDeleting ? "Deleting…" : "Delete note"}
+          </button>
+        </span>
       </footer>
     </article>
   );

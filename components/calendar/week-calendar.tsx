@@ -2,6 +2,7 @@
 
 import type { EventClickArg, EventInput } from "@fullcalendar/core";
 import interactionPlugin from "@fullcalendar/interaction";
+import luxonPlugin from "@fullcalendar/luxon3";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
 
@@ -14,6 +15,7 @@ import {
 interface WeekCalendarProps {
   events: CalendarEvent[];
   initialDate: Date;
+  compact?: boolean;
 }
 
 function toFullCalendarEvent(event: CalendarEvent): EventInput {
@@ -30,16 +32,16 @@ function toFullCalendarEvent(event: CalendarEvent): EventInput {
   };
 }
 
-export function WeekCalendar({ events, initialDate }: WeekCalendarProps) {
+export function WeekCalendar({ events, initialDate, compact = false }: WeekCalendarProps) {
   function handleEventClick(info: EventClickArg) {
     const htmlLink = info.event.extendedProps.htmlLink as string | undefined;
     if (htmlLink) window.open(htmlLink, "_blank", "noopener,noreferrer");
   }
 
   return (
-    <div className="calendar-grid">
+    <div className={`calendar-grid${compact ? " calendar-grid--compact" : ""}`}>
       <FullCalendar
-        plugins={[timeGridPlugin, interactionPlugin]}
+        plugins={[timeGridPlugin, interactionPlugin, luxonPlugin]}
         initialView="timeGridWeek"
         initialDate={initialDate}
         firstDay={1}
@@ -49,13 +51,13 @@ export function WeekCalendar({ events, initialDate }: WeekCalendarProps) {
         nowIndicator
         allDaySlot
         allDayText="all day"
-        slotMinTime="06:00:00"
+        slotMinTime={compact ? "07:00:00" : "06:00:00"}
         slotMaxTime="24:00:00"
         scrollTime="08:00:00"
         slotDuration="00:30:00"
         slotLabelInterval="01:00:00"
         expandRows
-        height="auto"
+        height={compact ? "100%" : "auto"}
         eventClick={handleEventClick}
         eventTimeFormat={{
           hour: "numeric",

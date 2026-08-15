@@ -2,14 +2,9 @@
 
 import { eq } from "drizzle-orm";
 
-import { auth } from "@/auth";
 import { db } from "@/lib/db/client";
 import { todos } from "@/lib/db/schema";
-
-async function requireOwner() {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
-}
+import { requireOwner } from "@/lib/auth/require-owner";
 
 export async function addTodo(formData: FormData) {
   await requireOwner();

@@ -4,7 +4,7 @@ import { google, type calendar_v3 } from "googleapis";
 
 import { CALENDAR_TIME_ZONE, type CalendarEvent } from "./format";
 
-export { CALENDAR_TIME_ZONE, getDayKey, formatDay, formatTime, type CalendarEvent } from "./format";
+export { CALENDAR_TIME_ZONE, getDayKey, type CalendarEvent } from "./format";
 
 export interface CalendarRange {
   start: Date;
@@ -45,28 +45,6 @@ function getOffsetMilliseconds(date: Date) {
 function zonedMidnight(year: number, month: number, day: number) {
   const approximate = new Date(Date.UTC(year, month - 1, day));
   return new Date(approximate.getTime() - getOffsetMilliseconds(approximate));
-}
-
-export function getSevenDayCalendarRange(now = new Date()): CalendarRange {
-  const { year, month, day } = getDateParts(now);
-  const startDate = new Date(
-    Date.UTC(Number(year), Number(month) - 1, Number(day)),
-  );
-  const endDate = new Date(startDate);
-  endDate.setUTCDate(endDate.getUTCDate() + 7);
-
-  return {
-    start: zonedMidnight(
-      startDate.getUTCFullYear(),
-      startDate.getUTCMonth() + 1,
-      startDate.getUTCDate(),
-    ),
-    end: zonedMidnight(
-      endDate.getUTCFullYear(),
-      endDate.getUTCMonth() + 1,
-      endDate.getUTCDate(),
-    ),
-  };
 }
 
 export function getCurrentCalendarWeekRange(now = new Date()): CalendarRange {
@@ -117,7 +95,7 @@ function normalizeEvent(event: calendar_v3.Schema$Event): CalendarEvent | null {
 
 export async function getPrimaryCalendarEvents(
   accessToken: string,
-  range = getSevenDayCalendarRange(),
+  range: CalendarRange,
 ) {
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });

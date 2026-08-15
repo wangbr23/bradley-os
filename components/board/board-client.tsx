@@ -16,9 +16,11 @@ import { TodosPanel, type BoardTodo } from "./todos-panel";
 
 const ResponsiveGridLayout = WidthProvider(GridLayout);
 
+const CALENDAR_MIN_HEIGHT = 12;
+
 const DEFAULT_LAYOUT: Layout[] = [
-  { i: "calendar", x: 0, y: 0, w: 8, h: 10 },
-  { i: "inbox", x: 0, y: 10, w: 8, h: 8 },
+  { i: "calendar", x: 0, y: 0, w: 8, h: 16, minH: CALENDAR_MIN_HEIGHT },
+  { i: "inbox", x: 0, y: 16, w: 8, h: 8 },
   { i: "notes", x: 8, y: 0, w: 4, h: 18 },
   { i: "todos", x: 8, y: 18, w: 4, h: 8 },
 ];
@@ -28,8 +30,8 @@ const SAVE_DEBOUNCE_MS = 500;
 interface BoardClientProps {
   initialLayout: Layout[] | null;
   today: Date;
-  todaysEvents: CalendarEvent[];
-  weekActivity: boolean[];
+  calendarEvents: CalendarEvent[];
+  calendarWeekStart: Date;
   inboxMessages: InboxDigestMessage[];
   totalUnread: number;
   recentNotes: RecentNote[];
@@ -40,14 +42,19 @@ interface BoardClientProps {
 
 function resolveLayout(initialLayout: Layout[] | null) {
   if (!initialLayout) return DEFAULT_LAYOUT;
-  if (initialLayout.some((item) => item.i === "todos")) return initialLayout;
+  const withCalendarMinimum = initialLayout.map((item) =>
+    item.i === "calendar"
+      ? { ...item, h: Math.max(item.h, CALENDAR_MIN_HEIGHT), minH: CALENDAR_MIN_HEIGHT }
+      : item,
+  );
+  if (withCalendarMinimum.some((item) => item.i === "todos")) return withCalendarMinimum;
 
-  const bottom = initialLayout.reduce(
+  const bottom = withCalendarMinimum.reduce(
     (maximum, item) => Math.max(maximum, item.y + item.h),
     0,
   );
   return [
-    ...initialLayout,
+    ...withCalendarMinimum,
     { i: "todos", x: 8, y: bottom, w: 4, h: 8 },
   ];
 }
@@ -55,8 +62,8 @@ function resolveLayout(initialLayout: Layout[] | null) {
 export function BoardClient({
   initialLayout,
   today,
-  todaysEvents,
-  weekActivity,
+  calendarEvents,
+  calendarWeekStart,
   inboxMessages,
   totalUnread,
   recentNotes,
@@ -88,8 +95,8 @@ export function BoardClient({
       <CalendarPanel
         key="calendar"
         today={today}
-        todaysEvents={todaysEvents}
-        weekActivity={weekActivity}
+        events={calendarEvents}
+        weekStart={calendarWeekStart}
       />
       <InboxPanel key="inbox" messages={inboxMessages} totalUnread={totalUnread} />
       <NotesPanel key="notes" notes={recentNotes} totalCount={totalNotes} now={now} />

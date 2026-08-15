@@ -5,9 +5,8 @@ import { auth, signOut } from "@/auth";
 import { getHomeLayout } from "@/app/actions/board-layout";
 import { BoardClient } from "@/components/board/board-loader";
 import {
-  getDayKey,
+  getCurrentCalendarWeekRange,
   getPrimaryCalendarEvents,
-  getSevenDayCalendarRange,
   type CalendarEvent,
 } from "@/lib/calendar/google";
 import { db } from "@/lib/db/client";
@@ -18,15 +17,15 @@ export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const session = await auth();
-  const range = getSevenDayCalendarRange();
-  const hasCalendarAccess = Boolean(session?.googleAccessToken) && !session?.googleTokenError;
+  const range = getCurrentCalendarWeekRange();
+  const accessToken = session?.googleAccessToken;
+  const calendarEventsPromise =
+    accessToken && !session?.googleTokenError
+      ? getPrimaryCalendarEvents(accessToken, range).catch(() => [] as CalendarEvent[])
+      : Promise.resolve([] as CalendarEvent[]);
 
   const [calendarEvents, inboxMessages, noteList, todoList, persistedLayout] = await Promise.all([
-    hasCalendarAccess
-      ? getPrimaryCalendarEvents(session!.googleAccessToken!, range).catch(
-          () => [] as CalendarEvent[],
-        )
-      : Promise.resolve([] as CalendarEvent[]),
+    calendarEventsPromise,
     getInboxDigest().catch(() => [] as InboxDigestMessage[]),
     db
       .select({ id: notes.id, title: notes.title, updatedAt: notes.updatedAt })
@@ -38,18 +37,6 @@ export default async function Home() {
       .orderBy(asc(todos.done), desc(todos.createdAt)),
     getHomeLayout(),
   ]);
-
-  const todayKey = getDayKey(range.start);
-  const todaysEvents = calendarEvents
-    .filter((event) => getDayKey(event.start, event.allDay) === todayKey)
-    .sort((a, b) => a.start.getTime() - b.start.getTime());
-
-  const weekActivity = Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(range.start);
-    date.setDate(date.getDate() + index);
-    const key = getDayKey(date);
-    return calendarEvents.some((event) => getDayKey(event.start, event.allDay) === key);
-  });
 
   const initialLayout = Array.isArray(persistedLayout) ? (persistedLayout as Layout[]) : null;
 
@@ -82,9 +69,9 @@ export default async function Home() {
         <div className="mt-10">
           <BoardClient
             initialLayout={initialLayout}
-            today={range.start}
-            todaysEvents={todaysEvents}
-            weekActivity={weekActivity}
+            today={new Date()}
+            calendarEvents={calendarEvents}
+            calendarWeekStart={range.start}
             inboxMessages={inboxMessages.slice(0, 3)}
             totalUnread={inboxMessages.length}
             recentNotes={noteList.slice(0, 3)}

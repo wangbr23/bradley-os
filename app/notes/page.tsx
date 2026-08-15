@@ -2,6 +2,7 @@ import { desc } from "drizzle-orm";
 import Link from "next/link";
 
 import { createNote } from "@/app/notes/actions";
+import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import { db } from "@/lib/db/client";
 import { notes } from "@/lib/db/schema";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 
 function formatUpdatedAt(date: Date) {
   return new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
+    timeZone: CALENDAR_TIME_ZONE,
     month: "short",
     day: "numeric",
     year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric",

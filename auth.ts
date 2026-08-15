@@ -1,17 +1,19 @@
 import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 
-const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
-const googleClientId = process.env.GOOGLE_CLIENT_ID?.trim();
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
-
-if (!ownerEmail) {
-  throw new Error("OWNER_EMAIL is required");
+// Returns a real `string`, not a narrowed `string | undefined` — narrowing
+// from an `if (!x) throw` guard doesn't persist into closures (e.g. the
+// NextAuth callbacks below), so a validated-but-still-optional const would
+// still need a non-null assertion at every use site inside them.
+function requireEnv(name: string): string {
+  const value = process.env[name]?.trim();
+  if (!value) throw new Error(`${name} is required`);
+  return value;
 }
 
-if (!googleClientId || !googleClientSecret) {
-  throw new Error("GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET are required");
-}
+const ownerEmail = requireEnv("OWNER_EMAIL").toLowerCase();
+const googleClientId = requireEnv("GOOGLE_CLIENT_ID");
+const googleClientSecret = requireEnv("GOOGLE_CLIENT_SECRET");
 
 async function refreshGoogleAccessToken(token: {
   googleRefreshToken?: string;
@@ -24,8 +26,8 @@ async function refreshGoogleAccessToken(token: {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      client_id: process.env.GOOGLE_CLIENT_ID!,
-      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      client_id: googleClientId,
+      client_secret: googleClientSecret,
       grant_type: "refresh_token",
       refresh_token: token.googleRefreshToken,
     }),

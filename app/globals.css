@@ -411,6 +411,43 @@ body {
   border-width: 1px 0 0;
 }
 
+.calendar-grid--compact {
+  height: 100%;
+  margin-top: 0;
+  min-height: 0;
+}
+
+.calendar-grid--compact .fc {
+  height: 100%;
+}
+
+.calendar-grid--compact .fc-col-header-cell-cushion,
+.calendar-grid--compact .fc-timegrid-axis-cushion,
+.calendar-grid--compact .fc-timegrid-slot-label-cushion {
+  font-size: 0.52rem;
+  letter-spacing: 0;
+}
+
+.calendar-grid--compact .fc-col-header-cell-cushion {
+  padding: 0.35rem 0.1rem;
+}
+
+.calendar-grid--compact .fc-timegrid-slot {
+  height: 1rem;
+}
+
+.calendar-grid--compact .fc-event {
+  font-size: 0.54rem;
+}
+
+.calendar-grid--compact .fc-event-time {
+  display: none;
+}
+
+.calendar-grid--compact .fc-scroller {
+  scrollbar-width: thin;
+}
+
 .panel-footer {
   position: relative;
   margin-top: 1rem;

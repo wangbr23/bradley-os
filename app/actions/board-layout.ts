@@ -2,16 +2,11 @@
 
 import { eq } from "drizzle-orm";
 
-import { auth } from "@/auth";
 import { db } from "@/lib/db/client";
 import { layouts } from "@/lib/db/schema";
+import { requireOwner } from "@/lib/auth/require-owner";
 
 const HOME_LAYOUT_ID = "home";
-
-async function requireOwner() {
-  const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
-}
 
 export async function saveLayout(layoutJson: unknown) {
   await requireOwner();

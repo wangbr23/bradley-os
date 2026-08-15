@@ -1,6 +1,7 @@
 import { forwardRef, type HTMLAttributes } from "react";
 import Link from "next/link";
 
+import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import type { InboxDigestMessage } from "@/lib/mail/inbox";
 import { PanelShell } from "./panel-shell";
 
@@ -8,7 +9,7 @@ import { PanelShell } from "./panel-shell";
 const receivedAtFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "2-digit",
-  timeZone: "America/Detroit",
+  timeZone: CALENDAR_TIME_ZONE,
 });
 
 interface InboxPanelProps extends HTMLAttributes<HTMLDivElement> {

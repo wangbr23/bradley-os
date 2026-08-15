@@ -32,26 +32,3 @@ export function getDayKey(date: Date, allDay = false) {
   return dayKeyFormatter.format(date);
 }
 
-export function formatDay(date: Date, index: number) {
-  if (index === 0) return "Today";
-  if (index === 1) return "Tomorrow";
-
-  return new Intl.DateTimeFormat("en-US", {
-    timeZone: CALENDAR_TIME_ZONE,
-    weekday: "long",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-}
-
-export function formatTime(event: CalendarEvent) {
-  if (event.allDay) return "All day";
-
-  const formatter = new Intl.DateTimeFormat("en-US", {
-    timeZone: CALENDAR_TIME_ZONE,
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-  return `${formatter.format(event.start)}–${formatter.format(event.end)}`;
-}
