@@ -1,9 +1,19 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+export const folders = sqliteTable("folders", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
 export const notes = sqliteTable("notes", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   bodyJson: text("body_json", { mode: "json" }).notNull(),
+  folderId: text("folder_id").references(() => folders.id, {
+    onDelete: "cascade",
+  }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });
@@ -12,7 +22,7 @@ export const diagrams = sqliteTable("diagrams", {
   id: text("id").primaryKey(),
   title: text("title").notNull(),
   sceneJson: text("scene_json", { mode: "json" }).notNull(),
-  noteId: text("note_id").references(() => notes.id),
+  noteId: text("note_id").references(() => notes.id, { onDelete: "cascade" }),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 });

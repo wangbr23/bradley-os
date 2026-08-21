@@ -6,7 +6,7 @@ import { WeekCalendar } from "@/components/calendar/week-calendar";
 import {
   CALENDAR_TIME_ZONE,
   getCurrentCalendarWeekRange,
-  getPrimaryCalendarEvents,
+  getPrimaryCalendarEventsSnapshot,
   type CalendarEvent,
 } from "@/lib/calendar/google";
 import styles from "./page.module.css";
@@ -35,7 +35,9 @@ export default async function CalendarPage() {
     error = "access";
   } else {
     try {
-      events = await getPrimaryCalendarEvents(session.googleAccessToken, range);
+      events = (
+        await getPrimaryCalendarEventsSnapshot(session.googleAccessToken, range)
+      ).events;
     } catch (cause) {
       error = "request";
       console.error(
@@ -47,6 +49,11 @@ export default async function CalendarPage() {
 
   return (
     <main className={styles.page}>
+      <nav className={styles.homeNav} aria-label="Home navigation">
+        <Link href="/" className="ink-action">
+          ← Home
+        </Link>
+      </nav>
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>
@@ -56,9 +63,6 @@ export default async function CalendarPage() {
             Calendar
           </h1>
         </div>
-        <Link href="/" className="ink-action">
-          ← Home
-        </Link>
       </header>
 
       {error ? (

@@ -18,6 +18,13 @@ export interface CalendarEventWrite {
   allDay: boolean;
 }
 
+const CALENDAR_CACHE_TTL_MS = 60_000;
+const calendarCache = new Map<
+  string,
+  { events: CalendarEvent[]; fetchedAt: number }
+>();
+const calendarRefreshes = new Map<string, Promise<CalendarEvent[]>>();
+
 function getDateParts(date: Date) {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: CALENDAR_TIME_ZONE,
@@ -130,6 +137,7 @@ export async function createPrimaryCalendarEvent(
   });
 
   if (!response.data.id) throw new Error("Google Calendar did not return an event ID");
+  calendarCache.clear();
   return { id: response.data.id, htmlLink: response.data.htmlLink ?? undefined };
 }
 
@@ -146,6 +154,7 @@ export async function updatePrimaryCalendarEvent(
     eventId,
     requestBody: toGoogleEventTimes(input),
   });
+  calendarCache.clear();
 }
 
 export async function getPrimaryCalendarEvents(
@@ -168,4 +177,43 @@ export async function getPrimaryCalendarEvents(
   return (response.data.items ?? [])
     .map(normalizeEvent)
     .filter((event): event is CalendarEvent => event !== null);
+}
+
+export async function getPrimaryCalendarEventsSnapshot(
+  accessToken: string,
+  range: CalendarRange,
+  force = false,
+) {
+  const key = `${range.start.toISOString()}:${range.end.toISOString()}`;
+  const cached = calendarCache.get(key);
+  const now = Date.now();
+  if (!force && cached) {
+    const stale = now - cached.fetchedAt >= CALENDAR_CACHE_TTL_MS;
+    if (stale && !calendarRefreshes.has(key)) {
+      const refresh = getPrimaryCalendarEvents(accessToken, range)
+        .then((events) => {
+          calendarCache.set(key, { events, fetchedAt: Date.now() });
+          return events;
+        })
+        .finally(() => {
+          calendarRefreshes.delete(key);
+        });
+      calendarRefreshes.set(key, refresh);
+    }
+    return {
+      events: cached.events,
+      stale,
+    };
+  }
+
+  let refresh = calendarRefreshes.get(key);
+  if (!refresh) {
+    refresh = getPrimaryCalendarEvents(accessToken, range).finally(() => {
+      calendarRefreshes.delete(key);
+    });
+    calendarRefreshes.set(key, refresh);
+  }
+  const events = await refresh;
+  calendarCache.set(key, { events, fetchedAt: Date.now() });
+  return { events, stale: false };
 }

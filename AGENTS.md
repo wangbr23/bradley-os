@@ -38,7 +38,7 @@ This is the most important principle in this file. The simple solution beats the
 - Commit message format: not yet decided (no git repo initialized yet).
 
 ## Architecture
-Single Next.js app, no monorepo tooling. Route Handlers/Server Actions carry the backend — no separate API service. Calendar events are never stored locally; Google Calendar is the system of record. `lib/db/schema.ts` holds four local tables: `notes`, `diagrams` (optionally linked to a note), `todos`, and the persisted home-board `layouts`. See the design spec (`docs/designs/2026-08-15-v1-design-spec.html`) and board design (`docs/designs/2026-08-15-board-home-screen.md`) for the reasoning.
+Single Next.js app, no monorepo tooling. Route Handlers/Server Actions carry the backend — no separate API service. Calendar events are never stored locally; Google Calendar is the system of record. `lib/db/schema.ts` holds five local tables: `folders`, `notes`, `diagrams` (optionally linked to a note), `todos`, and the persisted home-board `layouts`. Notes may belong to one flat folder; folder deletion cascades to its notes and diagrams. See the design spec (`docs/designs/2026-08-15-v1-design-spec.html`) and board design (`docs/designs/2026-08-15-board-home-screen.md`) for the reasoning.
 
 ## Context files
 Keep these current — they're what gives any session, or either CLI tool, continuity without re-deriving history from scratch.

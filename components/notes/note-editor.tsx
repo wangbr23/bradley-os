@@ -4,9 +4,9 @@ import type { JSONContent } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 
-import { deleteNote, saveNote } from "@/app/notes/actions";
+import { deleteNote, moveNoteToFolder, saveNote } from "@/app/notes/actions";
 import type { NoteDiagram } from "@/lib/diagrams/types";
 import { NoteDiagramEditor } from "./note-diagram-editor";
 import styles from "./note-editor.module.css";
@@ -15,19 +15,31 @@ interface NoteEditorProps {
   id: string;
   initialTitle: string;
   initialBody: JSONContent;
+  initialFolderId: string | null;
+  folders: { id: string; name: string }[];
   initialDiagram: NoteDiagram;
 }
 
-export function NoteEditor({ id, initialTitle, initialBody, initialDiagram }: NoteEditorProps) {
+export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, folders, initialDiagram }: NoteEditorProps) {
   const router = useRouter();
   const [mode, setMode] = useState<"notes" | "diagram">("notes");
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState<JSONContent>(initialBody);
   const [dirty, setDirty] = useState(false);
-  const [saveError, setSaveError] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"saved" | "unsaved" | "saving" | "error">("saved");
   const [deleteError, setDeleteError] = useState(false);
-  const [isSaving, startSaving] = useTransition();
+  const [folderId, setFolderId] = useState(initialFolderId ?? "");
+  const [folderError, setFolderError] = useState(false);
   const [isDeleting, startDeleting] = useTransition();
+  const [isMoving, startMoving] = useTransition();
+  const revisionRef = useRef(0);
+  const saveQueueRef = useRef<Promise<void>>(Promise.resolve());
+
+  function markDirty() {
+    revisionRef.current += 1;
+    setDirty(true);
+    setSaveStatus("unsaved");
+  }
   const editor = useEditor({
     extensions: [StarterKit],
     content: initialBody,
@@ -35,22 +47,32 @@ export function NoteEditor({ id, initialTitle, initialBody, initialDiagram }: No
     editorProps: { attributes: { class: styles.prose } },
     onUpdate({ editor: currentEditor }) {
       setBody(currentEditor.getJSON());
-      setDirty(true);
+      markDirty();
     },
   });
 
-  function handleSave() {
-    startSaving(async () => {
-      try {
-        await saveNote(id, title, body);
-        setDirty(false);
-        setSaveError(false);
-        router.refresh();
-      } catch {
-        setSaveError(true);
-      }
-    });
-  }
+  useEffect(() => {
+    if (!dirty) return;
+    const revision = revisionRef.current;
+    const timer = window.setTimeout(() => {
+      setSaveStatus("saving");
+      const request = saveQueueRef.current
+        .catch(() => undefined)
+        .then(() => saveNote(id, title, body));
+      saveQueueRef.current = request;
+      void request.then(
+        () => {
+          if (revisionRef.current !== revision) return;
+          setDirty(false);
+          setSaveStatus("saved");
+        },
+        () => {
+          if (revisionRef.current === revision) setSaveStatus("error");
+        },
+      );
+    }, 700);
+    return () => window.clearTimeout(timer);
+  }, [body, dirty, id, title]);
 
   function handleDelete() {
     if (!window.confirm("Delete this note? This cannot be undone.")) return;
@@ -72,23 +94,28 @@ export function NoteEditor({ id, initialTitle, initialBody, initialDiagram }: No
           value={title}
           onChange={(event) => {
             setTitle(event.target.value);
-            setDirty(true);
+            markDirty();
           }}
           aria-label="Note title"
           placeholder="Untitled note"
           className={styles.title}
         />
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={isSaving || !dirty}
-          className={`ink-action ${styles.disabled}`}
-        >
-          {saveError ? "Save failed" : isSaving ? "Saving…" : dirty ? "Save note" : "Saved"}
-        </button>
+        <span className={styles.saveStatus} data-error={saveStatus === "error"} aria-live="polite">
+          {saveStatus === "saving" ? "Saving…" : saveStatus === "error" ? "Save failed — keep editing to retry" : saveStatus === "unsaved" ? "Unsaved changes" : "Saved"}
+        </span>
       </div>
 
       <div className={styles.controls}>
+        <label className={styles.folderControl}>Folder
+          <select value={folderId} disabled={isMoving} onChange={(event) => {
+            const previous = folderId; const next = event.target.value; setFolderId(next);
+            startMoving(async () => { try { await moveNoteToFolder(id, next || null); setFolderError(false); router.refresh(); } catch { setFolderId(previous); setFolderError(true); } });
+          }}>
+            <option value="">Unfiled</option>
+            {folders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}
+          </select>
+          {folderError ? <span>Move failed</span> : null}
+        </label>
         {mode === "notes" ? (
           <div className={styles.toolbar}>
             <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()} className="ink-action">Bold</button>

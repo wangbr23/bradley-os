@@ -7,8 +7,6 @@ import { useCallback, useRef } from "react";
 import GridLayout, { WidthProvider, type Layout } from "react-grid-layout";
 
 import { saveLayout } from "@/app/actions/board-layout";
-import type { CalendarEvent } from "@/lib/calendar/format";
-import type { InboxDigestMessage } from "@/lib/mail/inbox";
 import { CalendarPanel } from "./calendar-panel";
 import { InboxPanel } from "./inbox-panel";
 import { NotesPanel, type RecentNote } from "./notes-panel";
@@ -30,10 +28,8 @@ const SAVE_DEBOUNCE_MS = 500;
 interface BoardClientProps {
   initialLayout: Layout[] | null;
   today: Date;
-  calendarEvents: CalendarEvent[];
   calendarWeekStart: Date;
-  inboxMessages: InboxDigestMessage[];
-  totalUnread: number;
+  calendarWeekEnd: Date;
   recentNotes: RecentNote[];
   totalNotes: number;
   todos: BoardTodo[];
@@ -62,10 +58,8 @@ function resolveLayout(initialLayout: Layout[] | null) {
 export function BoardClient({
   initialLayout,
   today,
-  calendarEvents,
   calendarWeekStart,
-  inboxMessages,
-  totalUnread,
+  calendarWeekEnd,
   recentNotes,
   totalNotes,
   todos,
@@ -95,10 +89,10 @@ export function BoardClient({
       <CalendarPanel
         key="calendar"
         today={today}
-        events={calendarEvents}
         weekStart={calendarWeekStart}
+        weekEnd={calendarWeekEnd}
       />
-      <InboxPanel key="inbox" messages={inboxMessages} totalUnread={totalUnread} />
+      <InboxPanel key="inbox" />
       <NotesPanel key="notes" notes={recentNotes} totalCount={totalNotes} now={now} />
       <TodosPanel key="todos" todos={todos} />
     </ResponsiveGridLayout>

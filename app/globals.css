@@ -510,6 +510,13 @@ html {
   margin-top: 1rem;
 }
 
+.panel-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 /* Restyle react-grid-layout's default resize handle into a corner tick. */
 .react-resizable-handle {
   position: absolute;

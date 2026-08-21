@@ -15,6 +15,13 @@
       "when": 1786814854522,
       "tag": "0001_marvelous_wiccan",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1787294953915,
+      "tag": "0002_exotic_toad",
+      "breakpoints": true
     }
   ]
 }

@@ -1,7 +1,9 @@
-import { forwardRef, type HTMLAttributes } from "react";
+"use client";
+
+import { forwardRef, type HTMLAttributes, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 
-import { createNote } from "@/app/notes/actions";
+import { createNote, deleteNoteFromBoard } from "@/app/notes/actions";
 import { PanelShell } from "./panel-shell";
 import styles from "./board.module.css";
 
@@ -22,6 +24,7 @@ export interface RecentNote {
   id: string;
   title: string;
   updatedAt: Date;
+  folderName: string | null;
 }
 
 interface NotesPanelProps extends HTMLAttributes<HTMLDivElement> {
@@ -31,16 +34,49 @@ interface NotesPanelProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const NotesPanel = forwardRef<HTMLDivElement, NotesPanelProps>(
-  function NotesPanel({ notes, totalCount, now, ...rest }, ref) {
+  function NotesPanel({ notes, totalCount, now, className, ...rest }, ref) {
+    const [items, setItems] = useState(notes);
+    const [count, setCount] = useState(totalCount);
+    const [deleteError, setDeleteError] = useState(false);
+    const [isDeleting, startDeleting] = useTransition();
+
+    useEffect(() => setItems(notes), [notes]);
+    useEffect(() => setCount(totalCount), [totalCount]);
+
+    function handleDelete(note: RecentNote) {
+      if (!window.confirm(`Delete “${note.title}”? This cannot be undone.`)) return;
+
+      const previousIndex = items.findIndex((item) => item.id === note.id);
+      setDeleteError(false);
+      setItems((current) => current.filter((item) => item.id !== note.id));
+      setCount((current) => Math.max(0, current - 1));
+
+      startDeleting(async () => {
+        try {
+          await deleteNoteFromBoard(note.id);
+        } catch {
+          setItems((current) => {
+            if (current.some((item) => item.id === note.id)) return current;
+            const restored = [...current];
+            restored.splice(previousIndex, 0, note);
+            return restored;
+          });
+          setCount((current) => current + 1);
+          setDeleteError(true);
+        }
+      });
+    }
+
     return (
       <PanelShell
         ref={ref}
         {...rest}
+        className={`${styles.notesPanel}${className ? ` ${className}` : ""}`}
         glyph="–"
         eyebrow="Recently edited"
         title="Notes –"
-        statValue={String(totalCount)}
-        statLabel={totalCount === 1 ? "note" : "notes"}
+        statValue={String(count)}
+        statLabel={count === 1 ? "note" : "notes"}
         footer={
           <>
             <Link href="/notes" className="ink-action">
@@ -52,19 +88,30 @@ export const NotesPanel = forwardRef<HTMLDivElement, NotesPanelProps>(
                 New note
               </button>
             </form>
+            {deleteError ? <span className={styles.actionError}>Delete failed — restored</span> : null}
+            {isDeleting ? <span className={styles.actionStatus}>Deleting…</span> : null}
           </>
         }
         rows={
-          notes.length === 0 ? (
+          items.length === 0 ? (
             <p className="panel-empty">Nothing written down.</p>
           ) : (
-            notes.map((note) => (
+            items.map((note) => (
               <div className="panel-row" key={note.id}>
                 <Link href={`/notes/${note.id}`} className="row-main panel-row-link">
                   <span className="glyph">–</span>
                   {note.title}
                 </Link>
-                <p className="row-time">{formatRelativeTime(note.updatedAt, now)}</p>
+                <p className="row-time">{note.folderName ?? "Unfiled"} · {formatRelativeTime(note.updatedAt, now)}</p>
+                <button
+                  type="button"
+                  className={styles.deleteButton}
+                  aria-label={`Delete ${note.title}`}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onClick={() => handleDelete(note)}
+                >
+                  ✕
+                </button>
               </div>
             ))
           )

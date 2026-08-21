@@ -2,8 +2,12 @@
 .titleRow { display: flex; align-items: baseline; gap: 1.5rem; }
 .title { min-width: 0; flex: 1; border: 0; background: transparent; font-family: var(--font-serif), Georgia, serif; font-size: 2.25rem; font-weight: 600; letter-spacing: -0.025em; outline: none; font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 60; }
 .title::placeholder { color: var(--muted); }
-.disabled:disabled { cursor: default; opacity: 0.4; }
+.saveStatus { flex: 0 0 auto; color: var(--muted); font-family: var(--font-mono); font-size: .6875rem; letter-spacing: .025em; text-transform: uppercase; }
+.saveStatus[data-error="true"] { color: #b91c1c; }
 .controls { display: flex; min-height: 3.5rem; align-items: center; gap: 1rem; margin-top: 1.5rem; border-bottom: 1px solid var(--border); }
+.folderControl { display: flex; align-items: center; gap: .5rem; color: var(--muted); font-family: var(--font-mono); font-size: .625rem; letter-spacing: .04em; text-transform: uppercase; }
+.folderControl select { max-width: 10rem; border-bottom: 1px solid var(--border); background: transparent; padding: .35rem; color: var(--foreground); text-transform: none; }
+.folderControl span { color: #b91c1c; }
 .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; padding-block: 0.75rem; }
 .modeSwitch { display: flex; align-items: center; gap: 0.55rem; margin-left: auto; color: var(--muted); font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.04em; text-transform: uppercase; }
 .switch { position: relative; width: 2.5rem; height: 1.25rem; border: 1px solid var(--border); border-radius: 999px; background: var(--background); cursor: pointer; }

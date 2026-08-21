@@ -1,0 +1,27 @@
+.sidebar { border-right: 1px solid var(--border); padding-right: 1rem; font-size: .8125rem; user-select: none; }
+.explorerHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: .5rem; color: var(--muted); font-family: var(--font-mono); font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; }
+.tools { display: flex; align-items: center; gap: .2rem; }
+.tools form { display: flex; }
+.tools button, .rowAction { display: grid; place-items: center; padding: .25rem; color: var(--muted); }
+.tools button:hover, .tools button:focus-visible, .rowAction:hover, .rowAction:focus-visible { color: var(--foreground); }
+.allNotes { display: flex; justify-content: space-between; margin-bottom: .35rem; padding: .4rem .45rem; }
+.treeTarget { border: 1px solid transparent; }
+.dropTarget { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.treeRow { display: flex; min-width: 0; align-items: center; }
+.chevron { display: grid; flex: 0 0 1.25rem; place-items: center; color: var(--muted); }
+.chevron svg { transition: transform 120ms ease; }
+.chevron svg[data-expanded="true"] { transform: rotate(90deg); }
+.treeLink { display: flex; min-width: 0; flex: 1; align-items: center; gap: .4rem; padding: .36rem .3rem; }
+.treeLink span, .noteRow span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.treeLink small { margin-left: auto; color: var(--muted); font-family: var(--font-mono); font-size: .625rem; }
+.active { background: color-mix(in srgb, var(--accent) 11%, transparent); color: var(--foreground); }
+.rowAction { flex: 0 0 auto; opacity: 0; }
+.treeRow:hover .rowAction, .treeRow:focus-within .rowAction { opacity: 1; }
+.children { margin-left: 1.25rem; border-left: 1px solid var(--border); }
+.noteRow { display: flex; align-items: center; gap: .4rem; padding: .34rem .35rem .34rem .65rem; color: var(--muted); cursor: grab; }
+.noteRow:hover, .noteRow:focus-visible { background: color-mix(in srgb, var(--foreground) 5%, transparent); color: var(--foreground); }
+.noteRow:active { cursor: grabbing; }
+.inlineCreate { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 0 1.25rem; padding: .25rem .35rem; }
+.inlineCreate input { min-width: 0; width: 100%; border: 1px solid var(--accent); background: transparent; padding: .2rem .3rem; outline: none; }
+.error { margin-top: .75rem; color: #b42318; font-size: .75rem; user-select: text; }
+@media (max-width: 700px) { .sidebar { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 1rem; } }

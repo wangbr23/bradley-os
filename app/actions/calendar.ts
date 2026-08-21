@@ -3,7 +3,7 @@
 import { auth } from "@/auth";
 import {
   createPrimaryCalendarEvent,
-  getPrimaryCalendarEvents,
+  getPrimaryCalendarEventsSnapshot,
   updatePrimaryCalendarEvent,
   type CalendarEventWrite,
 } from "@/lib/calendar/google";
@@ -17,7 +17,23 @@ async function requireCalendarAccess() {
 }
 
 export async function getCalendarEvents(start: Date, end: Date) {
-  return getPrimaryCalendarEvents(await requireCalendarAccess(), { start, end });
+  const snapshot = await getPrimaryCalendarEventsSnapshot(
+    await requireCalendarAccess(),
+    { start, end },
+  );
+  return snapshot.events;
+}
+
+export async function getCalendarEventsSnapshot(
+  start: Date,
+  end: Date,
+  force = false,
+) {
+  return getPrimaryCalendarEventsSnapshot(
+    await requireCalendarAccess(),
+    { start, end },
+    force,
+  );
 }
 
 export async function createCalendarEvent(

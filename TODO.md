@@ -20,9 +20,12 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 ## v1 — design spec scope
 - [x] Today dashboard — Calendar/Inbox/Notes/Todos as a drag-to-rearrange, resizable board on the home screen with persisted layout — see `docs/designs/2026-08-15-board-home-screen.md`.
 - [x] Calendar — Pacific-time FullCalendar week grid on both the home board and full Calendar page
+- [x] Dashboard navigation performance — immediate shell, independent Inbox/Calendar loading, 60-second stale-while-revalidate caches, and manual refresh
 - [ ] Calendar interactions — drag-to-create / drag-to-move / drag-to-resize with optimistic Google Calendar persistence (implemented; browser verification pending)
 - [ ] Diagrams — one embedded Excalidraw canvas per note with debounced persistence (implemented; browser verification pending)
 - [ ] Full-text search across notes
+- [x] Notes — flat folders with filtering, create/rename/delete, note moving, and dashboard labels
+- [x] Notes — debounced autosave for titles and Tiptap content
 - [ ] Visual design system applied throughout (palette, type, motion, empty states)
 
 ## v1.1 — deferred

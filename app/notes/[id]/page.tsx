@@ -15,6 +15,7 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
   const { id } = await params;
   const note = await db.query.notes.findFirst({ where: eq(notes.id, id) });
   if (!note) notFound();
+  const folderList = await db.query.folders.findMany({ orderBy: (folder, { asc }) => [asc(folder.name)] });
   let diagram = await db.query.diagrams.findFirst({
     where: eq(diagrams.noteId, id),
   });
@@ -37,18 +38,22 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
 
   return (
     <main className={styles.page}>
+      <nav className={styles.homeNav} aria-label="Home navigation">
+        <Link href="/" className="ink-action">
+          ← Home
+        </Link>
+      </nav>
       <header className={styles.header}>
         <Link href="/notes" className="ink-action">
           All notes
-        </Link>
-        <Link href="/" className="ink-action">
-          ← Home
         </Link>
       </header>
       <NoteEditor
         id={note.id}
         initialTitle={note.title}
         initialBody={note.bodyJson as JSONContent}
+        initialFolderId={note.folderId}
+        folders={folderList.map(({ id: folderId, name }) => ({ id: folderId, name }))}
         initialDiagram={{ id: diagram.id, scene: diagram.sceneJson as DiagramScene }}
       />
     </main>

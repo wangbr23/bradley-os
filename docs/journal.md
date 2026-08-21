@@ -105,3 +105,33 @@ Removed the obsolete global Tiptap rules after moving editor prose styling besid
 Added one note-owned Excalidraw canvas directly below the Tiptap body. Notes without a canvas show an "Insert diagram" action; creating it uses the existing `diagrams` table, and subsequent scene changes save to Turso after a 700 ms debounce with saving/error status. Existing scenes load with the note, diagrams can be removed independently, and deleting a note now removes its linked diagram first.
 
 Kept Excalidraw browser-only through a dynamic client import and stored a deliberately small JSON scene shape: elements, binary files, canvas background, and grid size. Lint, generated route types, TypeScript, and the webpack production build pass. Browser verification of insert/draw/reload/remove remains before the TODO is marked complete.
+
+## 2026-08-15 — Homepage note deletion, top-left navigation, and responsive route loading
+
+Added optimistic note deletion to the home Notes panel, including linked-diagram cleanup, confirmation, count updates, and rollback feedback. Moved the Home action into a consistent top-left navigation row on Inbox, Calendar, Notes, and note-detail pages while preserving page-specific actions.
+
+Investigated slow navigation. The primary cause is blocking server work with no loading boundary: Home waits for fresh Gmail IMAP and Google Calendar requests plus Turso queries; Inbox and Calendar each repeat their external request. Added a root `loading.tsx` spinner so client navigation commits immediately while destination data loads. The next performance step, if needed, is to stream the slow Inbox and Calendar home panels independently and optionally add a short single-user cache for their reads. Lint, generated route types, TypeScript, whitespace checks, and the webpack production build pass.
+
+## 2026-08-15 — Dashboard data loading and caching optimized
+
+Removed Gmail and Google Calendar from the home page's blocking server `Promise.all`; the board now renders after only its fast Turso reads, while Inbox and Calendar load independently inside their existing panels. Added browser-session caches so returning Home immediately restores the last panel data, plus 60-second server snapshots that serve stale data while starting a background refresh. Concurrent refreshes are coalesced to avoid duplicate IMAP or Google requests.
+
+Added Refresh controls to Inbox and Calendar panels. The full Inbox and Calendar pages reuse the same server snapshots, while Calendar writes clear the server event cache. This intentionally uses small single-user caches rather than adding Redux/API-route architecture. Lint, generated route types, TypeScript, whitespace checks, and the webpack production build pass.
+
+## 2026-08-21 — Flat note folders implemented
+
+Added durable flat folders to Notes. The Notes page now has a left sidebar for All Notes, Unfiled, and alphabetized folders, including inline folder creation plus rename and permanent deletion. Deleting a folder warns with its note count and cascades through its notes and linked diagrams. Creating a note inside a selected folder assigns it immediately; the note editor can move a note between folders or back to Unfiled.
+
+Existing notes remain Unfiled through the migration. The home Notes panel continues to show recent notes across every folder and now identifies each note's folder. Applied the schema to Turso and verified lint, generated route types, and TypeScript. The production compiler started successfully but remained active long enough that a second verification build was blocked by Next.js's build lock.
+
+## 2026-08-21 — Notes navigation changed to an IDE-style explorer
+
+Replaced the folder-filter sidebar with a compact Notes Explorer. It has distinct new-note and new-folder toolbar actions, disclosure arrows for expanding and collapsing folders, notes nested visibly beneath their folder, and Unfiled represented as the root destination. Notes can be dragged between folders or onto Unfiled, with the move persisted immediately through the existing server action.
+
+Kept the underlying one-level folder model unchanged: the explorer has tree interaction without implying that folders can nest yet. Folder rename and destructive delete remain available as row actions. ESLint, generated route types, and TypeScript pass; production-build verification remains blocked by the earlier lingering Next.js build lock.
+
+## 2026-08-21 — Note writing now autosaves
+
+Removed the manual Save button from the note editor. Title and Tiptap document changes now persist after 700 ms without another edit, with visible Unsaved changes, Saving, Saved, and failure states. Save requests are serialized so an older slow request cannot finish after and overwrite newer content, and successful saves no longer refresh the route or interrupt typing.
+
+The existing Excalidraw canvas retains its own debounced persistence. ESLint, generated route types, TypeScript, and whitespace validation pass.

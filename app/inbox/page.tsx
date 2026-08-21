@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
-import { getInboxDigest } from "@/lib/mail/inbox";
+import { getInboxDigestSnapshot } from "@/lib/mail/inbox";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -15,11 +15,11 @@ function formatReceivedAt(date: Date) {
 }
 
 export default async function InboxPage() {
-  let messages: Awaited<ReturnType<typeof getInboxDigest>> = [];
+  let messages: Awaited<ReturnType<typeof getInboxDigestSnapshot>>["messages"] = [];
   let error = false;
 
   try {
-    messages = await getInboxDigest();
+    messages = (await getInboxDigestSnapshot()).messages;
   } catch (cause) {
     error = true;
     console.error(
@@ -30,6 +30,11 @@ export default async function InboxPage() {
 
   return (
     <main className={styles.page}>
+      <nav className={styles.homeNav} aria-label="Home navigation">
+        <Link href="/" className="ink-action">
+          ← Home
+        </Link>
+      </nav>
       <header className={styles.header}>
         <div>
           <p className={styles.eyebrow}>
@@ -37,12 +42,6 @@ export default async function InboxPage() {
           </p>
           <h1 className={styles.title}>Inbox</h1>
         </div>
-        <Link
-          href="/"
-          className="ink-action"
-        >
-          ← Home
-        </Link>
       </header>
 
       {error ? (

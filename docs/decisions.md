@@ -131,3 +131,23 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** Start with one note-owned Excalidraw canvas embedded directly after the note body. Persist its scene in the existing `diagrams` table and save edits with a short debounce.
 
 **Consequences:** Notes gain a durable inline drawing surface with minimal editor complexity. Multiple diagrams and arbitrary placement within prose remain possible later if actual use demonstrates that need.
+
+## 2026-08-15 — Use targeted dashboard caches instead of RTK Query
+
+**Status:** Accepted
+
+**Context:** Returning Home repeated slow Gmail IMAP and Google Calendar work. RTK Query would provide a browser cache but require Redux, authenticated API routes, and converting the existing Server Component/Server Action data flow.
+
+**Decision:** Keep the existing architecture. Load slow Inbox and Calendar panels independently after the board shell, retain their last values in a browser-session module cache, and use 60-second process-local server snapshots with stale-while-revalidate behavior and coalesced refreshes. Provide explicit panel Refresh actions.
+
+**Consequences:** Home no longer waits for external services and revisits show prior data immediately. Warm server instances also avoid repeated external connections. Server cache warmth is best-effort on serverless deployments, while the browser-session cache still improves navigation within the active tab.
+
+## 2026-08-21 — Organize notes with one level of folders
+
+**Status:** Accepted
+
+**Context:** Notes need lightweight organization, but nested folder trees would add navigation, recursive persistence, and move semantics before that complexity is useful.
+
+**Decision:** A note belongs to zero or one folder, and folders cannot contain other folders. Existing and explicitly unassigned notes appear as Unfiled. Deleting a folder permanently deletes its notes and their linked diagrams through database foreign-key cascades.
+
+**Consequences:** Filtering, moving, and deletion remain easy to understand. Nested organization can be introduced later with a superseding decision if real use demonstrates the need.

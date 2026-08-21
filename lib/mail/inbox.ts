@@ -5,6 +5,9 @@ import { ImapFlow, type FetchMessageObject } from "imapflow";
 const MAX_MESSAGES = 50;
 const SOURCE_PREVIEW_BYTES = 24_000;
 const DIGEST_WINDOW_MS = 24 * 60 * 60 * 1000;
+const CACHE_TTL_MS = 60_000;
+let digestCache: { messages: InboxDigestMessage[]; fetchedAt: number } | null = null;
+let digestRefresh: Promise<InboxDigestMessage[]> | null = null;
 
 export interface InboxDigestMessage {
   id: string;
@@ -121,4 +124,34 @@ export async function getInboxDigest(): Promise<InboxDigestMessage[]> {
       client.close();
     }
   }
+}
+
+export async function getInboxDigestSnapshot(force = false) {
+  const now = Date.now();
+  if (!force && digestCache) {
+    const stale = now - digestCache.fetchedAt >= CACHE_TTL_MS;
+    if (stale && !digestRefresh) {
+      digestRefresh = getInboxDigest()
+        .then((messages) => {
+          digestCache = { messages, fetchedAt: Date.now() };
+          return messages;
+        })
+        .finally(() => {
+          digestRefresh = null;
+        });
+    }
+    return {
+      messages: digestCache.messages,
+      stale,
+    };
+  }
+
+  if (!digestRefresh) {
+    digestRefresh = getInboxDigest().finally(() => {
+      digestRefresh = null;
+    });
+  }
+  const messages = await digestRefresh;
+  digestCache = { messages, fetchedAt: Date.now() };
+  return { messages, stale: false };
 }
