@@ -121,8 +121,10 @@ export async function saveNote(id: string, title: string, body: JSONContent) {
     .set({ title: cleanTitle, bodyJson: body, updatedAt: new Date() })
     .where(eq(notes.id, id));
 
-  revalidatePath("/notes");
-  revalidatePath(`/notes/${id}`);
+  // No revalidatePath here: revalidating the viewed detail route made every
+  // autosave re-render it (three Turso reads plus a full diagram payload).
+  // The editor already holds the saved title/body in client state, and both
+  // notes routes are force-dynamic, so navigation always renders fresh data.
 }
 
 export async function deleteNote(id: string) {
