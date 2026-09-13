@@ -45,7 +45,7 @@ export function FolderSidebar({ folders, notes, selected, totalCount }: {
         const folder = await createFolder(folderName);
         setFolderName(""); setCreatingFolder(false); setError("");
         setExpanded((current) => new Set([...current, folder.id]));
-        router.push(`/notes?folder=${folder.id}`); router.refresh();
+        router.push(`/notes?folder=${folder.id}`);
       } catch (cause) { setError(cause instanceof Error ? cause.message : "Could not create folder"); }
     });
   }
@@ -54,7 +54,7 @@ export function FolderSidebar({ folders, notes, selected, totalCount }: {
     const nextName = window.prompt("Rename folder", folder.name);
     if (nextName === null || nextName.trim() === folder.name) return;
     startTransition(async () => {
-      try { await renameFolder(folder.id, nextName); setError(""); router.refresh(); }
+      try { await renameFolder(folder.id, nextName); setError(""); }
       catch (cause) { setError(cause instanceof Error ? cause.message : "Could not rename folder"); }
     });
   }
@@ -63,7 +63,7 @@ export function FolderSidebar({ folders, notes, selected, totalCount }: {
     const label = `${folder.count} ${folder.count === 1 ? "note" : "notes"}`;
     if (!window.confirm(`Delete “${folder.name}” and its ${label}? This cannot be undone.`)) return;
     startTransition(async () => {
-      try { await deleteFolder(folder.id); setError(""); if (selected === folder.id) router.push("/notes"); router.refresh(); }
+      try { await deleteFolder(folder.id); setError(""); if (selected === folder.id) router.push("/notes"); }
       catch { setError("Could not delete folder"); }
     });
   }
@@ -73,7 +73,7 @@ export function FolderSidebar({ folders, notes, selected, totalCount }: {
     const noteId = event.dataTransfer.getData("application/x-bradley-note");
     if (!noteId) return;
     startTransition(async () => {
-      try { await moveNoteToFolder(noteId, targetFolderId); setError(""); router.refresh(); }
+      try { await moveNoteToFolder(noteId, targetFolderId); setError(""); }
       catch { setError("Could not move note"); }
     });
   }

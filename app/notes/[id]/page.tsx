@@ -5,36 +5,20 @@ import { notFound } from "next/navigation";
 
 import { NoteEditor } from "@/components/notes/note-editor";
 import { db } from "@/lib/db/client";
-import { diagrams, notes } from "@/lib/db/schema";
-import type { DiagramScene } from "@/lib/diagrams/types";
+import { notes } from "@/lib/db/schema";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
   const { id } = await params;
-  const note = await db.query.notes.findFirst({ where: eq(notes.id, id) });
+  // The diagram is deliberately not read here: the editor loads it lazily
+  // when Diagram mode opens, so plain note reads pay nothing for canvas data.
+  const [note, folderList] = await Promise.all([
+    db.query.notes.findFirst({ where: eq(notes.id, id) }),
+    db.query.folders.findMany({ orderBy: (folder, { asc }) => [asc(folder.name)] }),
+  ]);
   if (!note) notFound();
-  const folderList = await db.query.folders.findMany({ orderBy: (folder, { asc }) => [asc(folder.name)] });
-  let diagram = await db.query.diagrams.findFirst({
-    where: eq(diagrams.noteId, id),
-  });
-  if (!diagram) {
-    const now = new Date();
-    const diagramId = crypto.randomUUID();
-    await db.insert(diagrams).values({
-      id: diagramId,
-      noteId: id,
-      title: `${note.title} canvas`,
-      sceneJson: { elements: [], appState: {}, files: {} },
-      createdAt: now,
-      updatedAt: now,
-    });
-    diagram = await db.query.diagrams.findFirst({
-      where: eq(diagrams.id, diagramId),
-    });
-  }
-  if (!diagram) throw new Error("Unable to create note canvas");
 
   return (
     <main className={styles.page}>
@@ -54,7 +38,6 @@ export default async function NotePage({ params }: PageProps<"/notes/[id]">) {
         initialBody={note.bodyJson as JSONContent}
         initialFolderId={note.folderId}
         folders={folderList.map(({ id: folderId, name }) => ({ id: folderId, name }))}
-        initialDiagram={{ id: diagram.id, scene: diagram.sceneJson as DiagramScene }}
       />
     </main>
   );

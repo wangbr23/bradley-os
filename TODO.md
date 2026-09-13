@@ -35,7 +35,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 
 ## Latency improvements
 - [x] `T1` Stop note autosave from revalidating and rerendering the open note route — agent, complexity: simple
-- [ ] `T2` Reduce note-opening latency by parallelizing independent detail reads and loading diagram data only when Diagram mode opens — agent, complexity: complex
-- [ ] `T3` Remove redundant `router.refresh()` calls after note and folder Server Actions — agent, complexity: simple, depends-on: T2
-- [ ] `T4` Defer FullCalendar loading so the home Notes panel becomes interactive without waiting for calendar JavaScript — agent, complexity: simple
+- [x] `T2` Reduce note-opening latency by parallelizing independent detail reads and loading diagram data only when Diagram mode opens — agent, complexity: complex
+- [x] `T3` Remove redundant `router.refresh()` calls after note and folder Server Actions — agent, complexity: simple, depends-on: T2
+- [x] `T4` Defer FullCalendar loading so the home Notes panel becomes interactive without waiting for calendar JavaScript — agent, complexity: simple (verified by lint/typecheck; full build blocked in this checkout by missing Turso env, same failure on clean tree)
 - [ ] `T5` Measure post-change note route timings and query behavior, then decide whether note indexes or list pagination are warranted — manual, depends-on: T1, T2, T3, T4

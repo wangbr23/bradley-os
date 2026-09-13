@@ -1,13 +1,20 @@
 "use client";
 
 import { forwardRef, type HTMLAttributes, useCallback, useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { getCalendarEventsSnapshot } from "@/app/actions/calendar";
-import { WeekCalendar } from "@/components/calendar/week-calendar";
 import { CALENDAR_TIME_ZONE, type CalendarEvent } from "@/lib/calendar/format";
 import { PanelShell } from "./panel-shell";
 import { cachedCalendarWeeks } from "./dashboard-cache";
+
+// FullCalendar is heavy; loading it through a separate chunk keeps the rest of
+// the board interactive while the calendar code arrives.
+const WeekCalendar = dynamic(
+  () => import("@/components/calendar/week-calendar").then((module) => module.WeekCalendar),
+  { ssr: false, loading: () => <p className="panel-empty">Loading calendar…</p> },
+);
 
 const todayEyebrowFormatter = new Intl.DateTimeFormat("en-US", {
   timeZone: CALENDAR_TIME_ZONE,

@@ -3,10 +3,9 @@
 import type { JSONContent } from "@tiptap/core";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 
-import { deleteNote, moveNoteToFolder, saveNote } from "@/app/notes/actions";
+import { createNoteDiagram, deleteNote, moveNoteToFolder, saveNote } from "@/app/notes/actions";
 import type { NoteDiagram } from "@/lib/diagrams/types";
 import { NoteDiagramEditor } from "./note-diagram-editor";
 import styles from "./note-editor.module.css";
@@ -17,12 +16,12 @@ interface NoteEditorProps {
   initialBody: JSONContent;
   initialFolderId: string | null;
   folders: { id: string; name: string }[];
-  initialDiagram: NoteDiagram;
 }
 
-export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, folders, initialDiagram }: NoteEditorProps) {
-  const router = useRouter();
+export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, folders }: NoteEditorProps) {
   const [mode, setMode] = useState<"notes" | "diagram">("notes");
+  const [diagram, setDiagram] = useState<NoteDiagram | null>(null);
+  const [diagramStatus, setDiagramStatus] = useState<"idle" | "loading" | "error">("idle");
   const [title, setTitle] = useState(initialTitle);
   const [body, setBody] = useState<JSONContent>(initialBody);
   const [dirty, setDirty] = useState(false);
@@ -74,6 +73,19 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
     return () => window.clearTimeout(timer);
   }, [body, dirty, id, title]);
 
+  function openDiagram() {
+    setMode("diagram");
+    if (diagram || diagramStatus === "loading") return;
+    setDiagramStatus("loading");
+    void createNoteDiagram(id).then(
+      (loaded) => {
+        setDiagram(loaded);
+        setDiagramStatus("idle");
+      },
+      () => setDiagramStatus("error"),
+    );
+  }
+
   function handleDelete() {
     if (!window.confirm("Delete this note? This cannot be undone.")) return;
     startDeleting(async () => {
@@ -109,7 +121,7 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
         <label className={styles.folderControl}>Folder
           <select value={folderId} disabled={isMoving} onChange={(event) => {
             const previous = folderId; const next = event.target.value; setFolderId(next);
-            startMoving(async () => { try { await moveNoteToFolder(id, next || null); setFolderError(false); router.refresh(); } catch { setFolderId(previous); setFolderError(true); } });
+            startMoving(async () => { try { await moveNoteToFolder(id, next || null); setFolderError(false); } catch { setFolderId(previous); setFolderError(true); } });
           }}>
             <option value="">Unfiled</option>
             {folders.map((folder) => <option key={folder.id} value={folder.id}>{folder.name}</option>)}
@@ -133,7 +145,7 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
             aria-checked={mode === "diagram"}
             className={styles.switch}
             data-active={mode === "diagram"}
-            onClick={() => setMode((current) => (current === "notes" ? "diagram" : "notes"))}
+            onClick={openDiagram}
           >
             <span className={styles.switchThumb} />
           </button>
@@ -143,8 +155,12 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
 
       {mode === "notes" ? (
         <EditorContent editor={editor} className={styles.content} />
+      ) : diagram ? (
+        <NoteDiagramEditor noteId={id} diagram={diagram} />
       ) : (
-        <NoteDiagramEditor noteId={id} diagram={initialDiagram} />
+        <div className={styles.diagramPending}>
+          {diagramStatus === "loading" ? "Loading note canvas…" : "Note canvas failed to load — switch again to retry"}
+        </div>
       )}
 
       <footer className={styles.footer}>
