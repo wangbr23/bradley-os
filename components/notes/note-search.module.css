@@ -1,0 +1,47 @@
+.container { position: relative; }
+.form { display: flex; }
+.input {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  outline: none;
+  padding: 0.45rem 0.6rem;
+  width: 14rem;
+}
+.input::placeholder { color: var(--muted); }
+.input:focus { border-color: var(--accent); }
+.suggestions {
+  position: absolute;
+  top: calc(100% + 0.25rem);
+  right: 0;
+  z-index: 20;
+  min-width: 16rem;
+  max-height: 20rem;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.08);
+}
+.suggestion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.5rem 0.6rem;
+  background: transparent;
+  border: 0;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+}
+.suggestion.active { background: var(--border); }
+.suggestionTitle { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.suggestionFolder { flex-shrink: 0; color: var(--muted); font-size: 0.625rem; letter-spacing: 0.04em; text-transform: uppercase; }

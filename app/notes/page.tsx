@@ -1,10 +1,12 @@
-import { asc, desc, or, sql } from "drizzle-orm";
+import { asc, desc } from "drizzle-orm";
 import Link from "next/link";
 
 import { createNote } from "@/app/notes/actions";
 import { FolderSidebar } from "@/components/notes/folder-sidebar";
+import { NoteSearch } from "@/components/notes/note-search";
 import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import { db } from "@/lib/db/client";
+import { searchClause } from "@/lib/db/note-search";
 import { folders, notes } from "@/lib/db/schema";
 import styles from "./page.module.css";
 
@@ -12,20 +14,6 @@ export const dynamic = "force-dynamic";
 
 function formatUpdatedAt(date: Date) {
   return new Intl.DateTimeFormat("en-US", { timeZone: CALENDAR_TIME_ZONE, month: "short", day: "numeric", year: date.getFullYear() === new Date().getFullYear() ? undefined : "numeric" }).format(date);
-}
-
-function escapeLike(term: string) {
-  return term.replace(/[\\%_]/g, (char) => `\\${char}`);
-}
-
-// SQLite LIKE is case-insensitive for ASCII by default; matching the raw
-// body_json text also catches words inside the serialized Tiptap document.
-function searchClause(term: string) {
-  const pattern = `%${escapeLike(term)}%`;
-  return or(
-    sql`${notes.title} LIKE ${pattern} ESCAPE '\\'`,
-    sql`${notes.bodyJson} LIKE ${pattern} ESCAPE '\\'`,
-  );
 }
 
 export default async function NotesPage({ searchParams }: PageProps<"/notes">) {
@@ -56,9 +44,7 @@ export default async function NotesPage({ searchParams }: PageProps<"/notes">) {
         <header className={styles.header}>
           <div><p className={styles.eyebrow}>{searching ? `${visibleNotes.length} ${visibleNotes.length === 1 ? "match" : "matches"} for “${term}”` : `${visibleNotes.length} ${visibleNotes.length === 1 ? "note" : "notes"}`}</p><h1 className={styles.title}>{title}</h1></div>
           <div className={styles.actions}>
-            <form action="/notes" method="get" role="search" className={styles.searchForm}>
-              <input type="search" name="q" defaultValue={term} placeholder="Search notes…" aria-label="Search notes" className={styles.searchInput} />
-            </form>
+            <NoteSearch initialTerm={term} />
             <form action={createNote}>{selectedFolder ? <input type="hidden" name="folderId" value={selectedFolder.id} /> : null}<button type="submit" className="ink-action">New note</button></form>
           </div>
         </header>
