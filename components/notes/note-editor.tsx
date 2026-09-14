@@ -86,6 +86,14 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
     );
   }
 
+  function toggleMode() {
+    if (mode === "diagram") {
+      setMode("notes");
+    } else {
+      openDiagram();
+    }
+  }
+
   function handleDelete() {
     if (!window.confirm("Delete this note? This cannot be undone.")) return;
     startDeleting(async () => {
@@ -145,7 +153,7 @@ export function NoteEditor({ id, initialTitle, initialBody, initialFolderId, fol
             aria-checked={mode === "diagram"}
             className={styles.switch}
             data-active={mode === "diagram"}
-            onClick={openDiagram}
+            onClick={toggleMode}
           >
             <span className={styles.switchThumb} />
           </button>
