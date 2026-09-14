@@ -26,7 +26,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [ ] Full-text search across notes
 - [x] Notes — flat folders with filtering, create/rename/delete, note moving, and dashboard labels
 - [x] Notes — debounced autosave for titles and Tiptap content
-- [ ] Visual design system applied throughout (palette, type, motion, empty states)
+- [x] Visual design system applied throughout (palette, type, motion, empty states)
 
 ## v1.1 — deferred
 - [ ] Note ↔ calendar-event linking

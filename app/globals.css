@@ -6,7 +6,7 @@
   --muted: #6b6459;
   --border: #dedad1;
   --accent: #9c6a0e;
-  --error: var(--error);
+  --error: #b42318;
 }
 
 @theme inline {
