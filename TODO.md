@@ -23,7 +23,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] Dashboard navigation performance — immediate shell, independent Inbox/Calendar loading, 60-second stale-while-revalidate caches, and manual refresh
 - [x] Calendar interactions — drag-to-create / drag-to-move / drag-to-resize with optimistic Google Calendar persistence
 - [x] Diagrams — one embedded Excalidraw canvas per note with debounced persistence
-- [ ] Full-text search across notes
+- [x] Full-text search across notes
 - [x] Notes — flat folders with filtering, create/rename/delete, note moving, and dashboard labels
 - [x] Notes — debounced autosave for titles and Tiptap content
 - [x] Visual design system applied throughout (palette, type, motion, empty states)

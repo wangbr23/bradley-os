@@ -5,7 +5,21 @@
 .header { display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
 .eyebrow { color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase; }
 .title { margin-top: 0.5rem; font-family: var(--font-mono); font-size: 1.875rem; font-weight: 700; letter-spacing: -0.025em; }
-.actions { display: flex; align-items: center; gap: 1.5rem; }
+.actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; }
+.searchForm { display: flex; }
+.searchInput {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  color: var(--foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  outline: none;
+  padding: 0.45rem 0.6rem;
+  width: 14rem;
+}
+.searchInput::placeholder { color: var(--muted); }
+.searchInput:focus { border-color: var(--accent); }
 .empty { padding-block: 4rem; }
 .emptyCopy { color: var(--muted); font-size: 0.875rem; }
 .emptyForm { margin-top: 1.5rem; }
