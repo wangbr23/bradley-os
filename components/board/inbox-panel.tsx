@@ -69,7 +69,7 @@ export const InboxPanel = forwardRef<HTMLDivElement, InboxPanelProps>(
           ) : error && messages.length === 0 ? (
             <p className="panel-empty">Inbox unavailable.</p>
           ) : messages.length === 0 ? (
-            <p className="panel-empty">No unread mail.</p>
+            <p className="panel-empty">No unread mail. Go outside.</p>
           ) : (
             messages.map((message) => (
               <div className="panel-row" key={message.id}>

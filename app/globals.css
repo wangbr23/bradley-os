@@ -6,6 +6,7 @@
   --muted: #6b6459;
   --border: #dedad1;
   --accent: #9c6a0e;
+  --error: var(--error);
 }
 
 @theme inline {
@@ -14,6 +15,8 @@
   --color-muted: var(--muted);
   --color-border: var(--border);
   --color-accent: var(--accent);
+  --color-error: var(--error);
+  --font-sans: var(--font-geist);
   --font-serif: var(--font-fraunces);
   --font-mono: var(--font-ibm-plex-mono);
 }
@@ -25,6 +28,7 @@
     --muted: #a69c8c;
     --border: #34302a;
     --accent: #e0a94a;
+    --error: #e07a5f;
   }
 }
 
@@ -36,12 +40,9 @@ body {
   background-image: radial-gradient(var(--border) 1px, transparent 1.5px);
   background-size: 22px 22px;
   color: var(--foreground);
-  font-family: var(--font-serif), Georgia, serif;
-  /* Fraunces variable axes: soft, slightly irregular letterforms read as
-     handmade rather than typeset. opsz stays low here for legibility —
-     it's bumped up only where the serif renders at real headline size
-     (components/notes/note-editor.module.css .title). */
-  font-variation-settings: "SOFT" 100, "WONK" 1, "opsz" 30;
+  /* Chrome is a grotesk; the serif is reserved for the notes reading
+     surface (note-editor .title and .prose). */
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 html {
@@ -288,7 +289,6 @@ html {
   flex: 1;
   border: 0;
   background: transparent;
-  font-family: var(--font-serif), Georgia, serif;
   font-size: 0.8rem;
   outline: none;
 }
@@ -308,6 +308,8 @@ html {
   font-size: 0.65rem;
   color: var(--background);
   cursor: pointer;
+  /* State change, not decoration: checking a todo fills the box. */
+  transition: background-color 150ms linear, border-color 150ms linear;
 }
 
 .panel-todo-check[data-done="true"] {
@@ -321,6 +323,10 @@ html {
   text-decoration-color: var(--border);
 }
 
+.todos-panel .row-main {
+  transition: color 150ms linear, text-decoration-color 150ms linear;
+}
+
 .panel-todo-delete {
   font-family: var(--font-mono);
   font-size: 0.65rem;
@@ -329,7 +335,7 @@ html {
 }
 
 .panel-todo-delete:hover {
-  color: #b42318;
+  color: var(--error);
 }
 
 /* --- FullCalendar: week grid in the same ink-and-hairline system --- */
@@ -489,9 +495,9 @@ html {
 }
 
 .calendar-write-error {
-  border-top: 1px solid #b42318;
+  border-top: 1px solid var(--error);
   padding: 0.5rem 0;
-  color: #b42318;
+  color: var(--error);
   font-family: var(--font-mono);
   font-size: 0.68rem;
 }
@@ -548,6 +554,11 @@ html {
   }
 
   .panel-drag-handle {
+    transition: none;
+  }
+
+  .panel-todo-check,
+  .todos-panel .row-main {
     transition: none;
   }
 }

@@ -3,5 +3,5 @@
 .canvas :global(.excalidraw) { background: #ffffff !important; }
 .status, .error, .loading { padding-top: 0.5rem; font-family: var(--font-mono); font-size: 0.6875rem; letter-spacing: 0.025em; text-transform: uppercase; }
 .status, .loading { color: var(--muted); }
-.error { color: #b91c1c; }
+.error { color: var(--error); }
 @media (max-width: 640px) { .canvas { height: 65vh; min-height: 28rem; } }

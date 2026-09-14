@@ -4,7 +4,7 @@
 .meta { color: var(--muted); font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.025em; text-transform: uppercase; }
 .notesPanel :global(.panel-row) { grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; }
 .deleteButton { color: var(--muted); cursor: pointer; font-family: var(--font-mono); font-size: 0.65rem; }
-.deleteButton:hover, .deleteButton:focus-visible { color: #b42318; }
+.deleteButton:hover, .deleteButton:focus-visible { color: var(--error); }
 .deleteButton:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
 .actionError, .actionStatus { margin-left: 0.75rem; color: var(--muted); font-family: var(--font-mono); font-size: 0.625rem; }
-.actionError { color: #b42318; }
+.actionError { color: var(--error); }

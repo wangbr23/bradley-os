@@ -136,7 +136,7 @@ export const TodosPanel = forwardRef<HTMLDivElement, TodosPanelProps>(
         }
         rows={
           items.length === 0 ? (
-            <p className="panel-empty">Nothing to do.</p>
+            <p className="panel-empty">Nothing to do. Enjoy it.</p>
           ) : (
             items.map((todo) => (
               <div className="panel-row" key={todo.id}>

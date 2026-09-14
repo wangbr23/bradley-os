@@ -94,7 +94,7 @@ export const NotesPanel = forwardRef<HTMLDivElement, NotesPanelProps>(
         }
         rows={
           items.length === 0 ? (
-            <p className="panel-empty">Nothing written down.</p>
+            <p className="panel-empty">Nothing written down. Start one.</p>
           ) : (
             items.map((note) => (
               <div className="panel-row" key={note.id}>

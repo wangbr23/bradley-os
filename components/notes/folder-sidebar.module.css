@@ -23,5 +23,5 @@
 .noteRow:active { cursor: grabbing; }
 .inlineCreate { display: flex; align-items: center; gap: .4rem; margin: .2rem 0 0 1.25rem; padding: .25rem .35rem; }
 .inlineCreate input { min-width: 0; width: 100%; border: 1px solid var(--accent); background: transparent; padding: .2rem .3rem; outline: none; }
-.error { margin-top: .75rem; color: #b42318; font-size: .75rem; user-select: text; }
+.error { margin-top: .75rem; color: var(--error); font-size: .75rem; user-select: text; }
 @media (max-width: 700px) { .sidebar { border-right: 0; border-bottom: 1px solid var(--border); padding: 0 0 1rem; } }

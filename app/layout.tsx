@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
-import { Fraunces, IBM_Plex_Mono } from "next/font/google";
+import { Fraunces, Geist, IBM_Plex_Mono } from "next/font/google";
 import "@excalidraw/excalidraw/index.css";
 import "./globals.css";
+
+const geist = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+  weight: "variable",
+});
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -25,7 +31,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${ibmPlexMono.variable}`}
+      className={`${geist.variable} ${fraunces.variable} ${ibmPlexMono.variable}`}
     >
       <body>{children}</body>
     </html>
