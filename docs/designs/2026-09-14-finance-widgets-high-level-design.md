@@ -174,11 +174,12 @@ Mapped from the research doc's "Gaps to close" and the spec's NFR-1:
 
 ## 10. Open decisions that block implementation
 
-Mapped from the product spec's Open Questions:
+Mapped from the product spec's Open Questions. **All resolved 2026-09-15 — see the product spec's Open Questions section:**
 
-1. **Bank-widget transaction scope** (five combined vs. per account) — display-only decision, no architecture impact; confirm before building the panel.
-2. **History depth** — **recommended: 730 days (Plaid's max)**. The widgets show five transactions, but Plaid's history window is chosen at first link and **increasing it later can require deleting and relinking the Item** — a concrete future cost that maxing out now avoids for free (Plaid bills per Item, not per transaction; a few thousand Turso rows are negligible). Must be confirmed before the first Production link.
-3. **App-session durations** (24h max + 30-min idle recommended) — touches only `auth.ts`; independent of the finance work.
+1. **Bank-widget transaction scope** — **confirmed: five combined** across all connected bank accounts.
+2. **History depth** — **confirmed: 730 days (Plaid's max)**, as recommended below.
+3. **App-session durations** — **confirmed: 24-hour maximum + 30-minute idle**; touches only `auth.ts` (tracked as TODO T34), independent of the finance work.
+4. **FR-5 details page** — **deferred**; not part of the first version (§6.1 stays a sketch).
 
 ## 11. Effort
 

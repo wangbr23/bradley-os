@@ -205,7 +205,7 @@ Refresh button → `syncNow()` → all healthy items synced regardless of `dirty
 7. **Cursor atomicity + restart-from-cursor:** one `db.transaction` per `runItemSync` invocation covers all row mutations plus the cursor write (invariant S2). Drizzle's `libsql` driver supports transactions. A failed run leaves the old cursor, and re-running is idempotent (upserts + deletes by id), so duplicate webhook delivery is harmless by construction.
 8. **Snapshot queries:** (a) one query for depository accounts + `SUM(current_balance)` combined stat; (b) depository top-5 = `ORDER BY date DESC, updatedAt DESC, id` `LIMIT 5` joined through accounts; (c) per-card top-5 = a single `ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY date DESC, updatedAt DESC, id)` window query (SQLite core feature, one roundtrip instead of one query per card). Tie-break on `updatedAt` so the newest sync info wins same-day ties.
 9. **Link launching:** `plaid-link-launcher.tsx` mounts a button; on click it fetches the token from the server action, then the dynamically imported inner component opens Link. Link tokens expire (~30 min) and public tokens are single-use, so the token is fetched per open, never cached; on `onExit` or exchange failure the user simply re-clicks.
-10. **Link token parameters (connect):** `products: ["transactions"]`, `countryCodes: ["US"]`, `clientUserId: "bradley-os-owner"` (stable fake id; no PII), `webhook: PLAID_WEBHOOK_URL` (env), `redirectUri: PLAID_REDIRECT_URI` when the env var is set (required only for Production OAuth institutions — the deployment-boundary TODO), `transactions.daysRequested: 730` (Open Question 2 — accepted-for-now pending confirmation, §10).
+10. **Link token parameters (connect):** `products: ["transactions"]`, `countryCodes: ["US"]`, `clientUserId: "bradley-os-owner"` (stable fake id; no PII), `webhook: PLAID_WEBHOOK_URL` (env), `redirectUri: PLAID_REDIRECT_URI` when the env var is set (required only for Production OAuth institutions — the deployment-boundary TODO), `transactions.daysRequested: 730` (confirmed 2026-09-15, Open Question 2, §10).
 11. **Provider-token fix:** `auth.ts`'s `session` callback stops copying `googleAccessToken`/`googleTokenError` into the session (that object is client-exposed); `types/next-auth.d.ts` drops both fields; the JWT callback keeps holding them inside the encrypted cookie. Server consumers (`app/actions/calendar.ts`, `app/calendar/page.tsx`) switch to a new `lib/auth/google-token.ts` that reads the session JWT with `getToken()` from `next-auth/jwt` (same secret/cookie config). Calendar behavior is unchanged; nothing about Plaid tokens ever enters the session.
 12. **Item status transition table** (invariant S1):
 
@@ -274,10 +274,12 @@ Only if Open Question 4 is confirmed (the HLD's §6.1 exploration). Kept to a sk
 
 ## 10. Open questions
 
-1. **Bank-widget transaction scope** (five combined vs. per account) — accepted-for-now: **combined across accounts** (HLD recommendation; journal confirms). The snapshot shape (§4.2) supports either; the depository query changes only if per-account wins. Confirm before building the panel.
-2. **History depth** — accepted-for-now: **730 days** (`transactions.daysRequested`), per the HLD's recommendation; must be confirmed before the first Production link because it's fixed at first link.
-3. **App-session durations** — Open Question 3 of the spec; touches only `auth.ts`; deliberately not designed here. Independent of finance.
-4. **FR-5 details page** — Open Question 4; contingent sketch in §9, build only after confirmation.
+Resolved on 2026-09-15 (recorded in the product spec and decisions log); only 5–7 below remain genuinely open:
+
+1. **Bank-widget transaction scope** — **confirmed: combined across accounts.** The snapshot shape (§4.2) already matches; no change.
+2. **History depth** — **confirmed: 730 days** (`transactions.daysRequested`), as pinned.
+3. **App-session durations** — **confirmed: 24-hour maximum + 30-minute idle**; touches only `auth.ts`, tracked as TODO T34. Not designed here.
+4. **FR-5 details page** — **deferred**; contingent sketch in §9 stays unbuilt until a need emerges.
 5. **Deployment boundary** — the webhook route and `PLAID_REDIRECT_URI` only work behind a stable public HTTPS origin; the Production boundary is an unresolved TODO item and blocks live connecting (not sandbox work).
 6. **`react-plaid-link` React 19 peer compatibility** — verify at install time; if peer deps conflict, fall back to a thin direct wrapper over Plaid Link's JS initializer (the hook is a thin layer over `cdn.plaid.com/link/v2/stable/link-initialize.js`). Sandbox build will surface it immediately.
 7. **Plaid account terms (Trial vs paid, per-Item rates)** — rollout/Dashboard item, outside this design.

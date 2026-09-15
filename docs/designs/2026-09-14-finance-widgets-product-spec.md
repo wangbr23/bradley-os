@@ -1,6 +1,6 @@
 # Finance Widgets — Product Spec
 
-**Last updated:** 2026-09-14
+**Last updated:** 2026-09-15
 
 ## Overview
 
@@ -63,7 +63,7 @@ The widgets are read-only views. Data updates automatically on the connection's 
 - FR-5.3 The details view shows the data the app has already synchronized; opening it does not require contacting the bank.
 - FR-5.4 The details view is a simple chronological list. Search, filtering, categories, and insights stay out of scope.
 
-FR-5 is an exploration raised in review, not yet a confirmed requirement — confirm it alongside the Open Questions before implementation.
+FR-5 is an exploration raised in review. **Deferred 2026-09-15 (Open Question 4):** not built in the first version; the retained history stays cached locally and a details page can be added cheaply later (sketch in the LLD §9).
 
 ## Non-Functional Requirements
 
@@ -103,7 +103,13 @@ FR-5 is an exploration raised in review, not yet a confirmed requirement — con
 
 ## Open Questions
 
+**All four resolved on 2026-09-15:**
+
 1. **Bank widget's "five most recent transactions": the spec assumes they are the five most recent across all connected bank accounts combined.** The alternative is five per account, which implies per-account sections. Confirm before implementation.
+   - **Resolved: five combined** across all connected bank accounts (display-only; changeable later without schema impact).
 2. **How much transaction history the app should retain from connection time** (e.g. 90 days, 1 year, or up to 2 years). Not visible in these widgets (they show five), but it determines what a future history/search feature can offer. Confirm before implementation.
+   - **Resolved: 730 days (Plaid's maximum)** — free at first link; increasing later can require deleting and relinking the Item; storage cost is negligible.
 3. **Exact Bradley OS app-session durations.** Research recommended a 24-hour maximum session and 30-minute idle timeout — app sessions only; they never affect bank connections (FR-4.6/4.7). Confirm these values.
+   - **Resolved: 24-hour maximum + 30-minute idle timeout** (app sessions only). Implementation tracked as TODO T34.
 4. **Whether to build the transaction details page (draft FR-5).** It would make the retained history (Open Question 2) user-visible rather than stored-but-hidden. Confirm before implementation.
+   - **Resolved: deferred** — not built in the first version; revisit if a need for history beyond the recent five emerges.

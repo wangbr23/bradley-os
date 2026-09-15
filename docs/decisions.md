@@ -171,3 +171,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** After mount, the finance panels call a `syncDirtyItems()` server action once per page load; it syncs items flagged `dirty` by webhooks and returns the fresh snapshot for panel reconciliation. The webhook still does no sync work, and the trigger set stays: connect, post-mount dirty check, manual refresh, post-repair.
 
 **Consequences:** One small client roundtrip per page load. Works on both long-running and serverless hosts; if staleness ever matters, the next step remains a scheduled job.
+
+## 2026-09-15 — Resolve the finance product-spec open questions
+
+**Status:** Accepted
+
+**Context:** The finance product spec's four open questions gated parts of the implementation plan: the bank widget's transaction display (blocked its panel task), the Plaid history window (fixed at first link), app-session durations (auth-only), and the draft FR-5 transaction details page.
+
+**Decision:** OQ1: the Bank Accounts widget shows the five most recent transactions combined across all connected bank accounts. OQ2: request Plaid's maximum 730-day history window at first link. OQ3: Auth.js app sessions use a 24-hour maximum with a 30-minute idle timeout; app sessions only, never affecting bank connections. OQ4: the FR-5 transaction details page is deferred; the 730-day history stays cached locally so the page can be added cheaply later.
+
+**Consequences:** The LLD's accepted-for-now stances (combined five, 730 days) become final and the bank panel task is unblocked. Session-duration configuration becomes a small standalone auth.ts task (TODO T34), gating go-live with the other pre-live security items. The deferred details page keeps its LLD sketch (§9) and needs no schema change if revived.
