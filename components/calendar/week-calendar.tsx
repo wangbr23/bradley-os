@@ -160,7 +160,7 @@ export function WeekCalendar({ events, initialDate, compact = false }: WeekCalen
         nowIndicator
         allDaySlot
         allDayText="all day"
-        slotMinTime={compact ? "07:00:00" : "06:00:00"}
+        slotMinTime="06:00:00"
         slotMaxTime="24:00:00"
         scrollTime="08:00:00"
         slotDuration="00:30:00"
