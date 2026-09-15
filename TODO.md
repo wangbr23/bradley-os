@@ -39,3 +39,13 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] `T3` Remove redundant `router.refresh()` calls after note and folder Server Actions — agent, complexity: simple, depends-on: T2
 - [x] `T4` Defer FullCalendar loading so the home Notes panel becomes interactive without waiting for calendar JavaScript — agent, complexity: simple (verified by lint/typecheck; full build blocked in this checkout by missing Turso env, same failure on clean tree)
 - [x] `T5` Measure post-change note route timings and query behavior, then decide whether note indexes or list pagination are warranted — manual, depends-on: T1, T2, T3, T4 (observed latency much better; no further work warranted)
+
+## Finance integration
+- [x] Research Plaid integration complexity, security, products, and cost — see `docs/designs/2026-09-14-plaid-integration-research.md`
+- [x] Research competitor app-session and bank-reconnection behavior, and how often Plaid credentials need refreshing — see `docs/designs/2026-09-14-finance-widgets-product-spec.md` Open Questions
+- [x] Write the finance widgets product spec (Bank Accounts + Credit Cards widgets, Plaid-backed) — see `docs/designs/2026-09-14-finance-widgets-product-spec.md`
+- [x] Write the high-level technical design grounded in the codebase — see `docs/designs/2026-09-14-finance-widgets-high-level-design.md`
+- [ ] Confirm the product spec's open questions (bank-widget transaction scope, retained history depth, app-session durations) and the draft FR-5 transaction details page
+- [ ] Confirm intended institution coverage and the account's Trial/Pay-as-you-go limits and prices in the Plaid Dashboard
+- [ ] Document the Production HTTPS deployment and webhook boundary before connecting live accounts
+- [ ] Harden authentication, token storage, response caching, security headers, and webhook verification before storing live financial data

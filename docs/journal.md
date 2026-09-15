@@ -135,3 +135,39 @@ Kept the underlying one-level folder model unchanged: the explorer has tree inte
 Removed the manual Save button from the note editor. Title and Tiptap document changes now persist after 700 ms without another edit, with visible Unsaved changes, Saving, Saved, and failure states. Save requests are serialized so an older slow request cannot finish after and overwrite newer content, and successful saves no longer refresh the route or interrupt typing.
 
 The existing Excalidraw canvas retains its own debounced persistence. ESLint, generated route types, TypeScript, and whitespace validation pass.
+
+## 2026-09-14 — Plaid finance integration researched
+
+Researched Plaid's current Link, Transactions, Liabilities, Balance, Statements, webhook, OAuth, security, Production-access, and billing documentation against Bradley OS's existing Auth.js and Turso architecture. Saved the findings in `docs/designs/2026-09-14-plaid-integration-research.md`; no application code or product scope was changed.
+
+Recommended starting with Transactions only: it covers bank and credit-card activity plus cached balances without exposing routing/account numbers or enabling money movement. Liabilities can be added later for card due dates, minimum payments, statement balances, and APRs; literal PDF Statements and paid real-time Balance calls are unnecessary unless a specific widget requires them.
+
+The current billing docs say teams created on or after April 15, 2026 can use a free Trial with 10 lifetime Production Items, which could cover a single user for $0, but Plaid's public pricing page still describes a conflicting 200-call Limited Production allowance. The Dashboard or Plaid support must confirm the actual account terms and paid per-Item rates before live linking. Security work remains before Production: keep provider tokens server-only, encrypt Plaid access tokens outside the database trust boundary, directly enforce the owner email on finance data access, verify signed webhooks, disable finance caching, add security headers, and document the currently unknown HTTPS deployment boundary.
+
+## 2026-09-14 — Finance widgets product spec written
+
+Researched how often Plaid connections need credential refresh from Plaid's own docs (Items and OAuth guide): access tokens do not expire; re-authentication is event-driven (changed credentials, expired one-time passcodes, user revocation at the bank, and consent expiration at a small set of institutions — mostly 12 months, Brex 3 months, Chase user-chosen 6 months/1 year/"always", Europe ~180 days). Plaid fires a PENDING_DISCONNECT webhook one week before consent expires, so the app can prompt repair in advance; update mode resets the expiration. This confirmed that Bradley OS should never prompt for re-login on its own schedule.
+
+Competitor research on app-session persistence (Monarch, YNAB, Copilot, Empower) found no published idle/absolute session limits anywhere; all treat bank connections as a separate lifecycle from dashboard login. This is not a coincidence to engineer around — it validates keeping app sessions and Plaid connections fully independent.
+
+Wrote `docs/designs/2026-09-14-finance-widgets-product-spec.md`: non-technical spec for the Bank Accounts and Credit Cards home-board widgets plus the connection lifecycle. Covers combined/per-account balances, five most recent transactions, per-card tabs, in-widget connect/repair/disconnect, automatic updates with a visible last-updated time, and the confirmed principle that repair prompts fire only when the bank/connection service signals a broken or expiring connection. Recorded security NFRs (no bank credentials in the app, masked identifiers only, no browser caching of financial data, data purged on confirmed disconnect). Out of scope: due dates/minimum payments/APRs, PDF statements, budgeting, money movement, and transaction history beyond five per view.
+
+Three open questions remain in the spec: bank-widget transaction scope (five combined vs. per account), retained history depth, and exact app-session durations (research recommends 24-hour maximum + 30-minute idle; app sessions only, never connections). TODO.md updated; no application code changed.
+
+## 2026-09-14 — Finance widgets high-level technical design written
+
+Wrote `docs/designs/2026-09-14-finance-widgets-high-level-design.md`, grounded in the actual codebase (server-action patterns, `proxy.ts` matcher, `board-client.tsx` layout resolution, `PanelShell`, schema conventions). It specifies three new Drizzle tables (`plaid_items`, `financial_accounts`, `financial_transactions`) using Plaid's own IDs, a server-only `lib/plaid/` module set (client, crypto, sync, webhook verification), `app/actions/finance.ts` server actions, and a single unauthenticated `app/api/plaid/webhook/route.ts` with a narrow `api/plaid` proxy exclusion.
+
+Key decisions: no queue/cron (webhook marks items dirty; sync runs on board load, manual refresh, or after repair); webhook does no sync work; amounts stored as REAL; no category/merchant columns until a widget needs them; AES-256-GCM token encryption with the key outside Turso; `PENDING_DISCONNECT` (one week before consent expiry) drives the only repair prompts; disconnect calls `/item/remove` before purging local rows. Prerequisite security items carried in from the research doc: stop exposing `googleAccessToken` via the session callback, harden `requireOwner()` to check the owner email directly, CSP for `cdn.plaid.com` in the currently-empty `next.config.ts`.
+
+Two recommendations for the spec's open questions: 730-day Plaid history window (chosen at first link; increasing later requires relinking, so maxing out now is free), and the bank widget's five transactions shown combined across accounts. Effort estimate from the research doc: ~10-16 engineering days production-ready, sandbox demo 2-3 days.
+
+## 2026-09-14 — Finance widgets low-level design written
+
+Wrote `docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md` from the finance widgets HLD (user confirmed the HLD as the target since two 2026-09-14 docs were candidates). The LLD pins the mechanisms the HLD left open: a `dirty` boolean column on `plaid_items` for the webhook→sync handoff; webhook verification via `jose` (already in the tree via next-auth) with per-`kid` JWKS fetch and an injectable fetch for tests; AES-256-GCM token ciphertext as a versioned `v1:nonce:ct:tag` string; one-transaction cursor writes in the sync engine; duplicate-Item handling that removes the new token and returns the existing item; snapshot queries including a single `ROW_NUMBER()` window query for per-card top-5; and a static CSP in `next.config.ts` with the `'unsafe-inline'` weakening stated honestly.
+
+Two derived choices were recorded in `docs/decisions.md`: Vitest as the first test framework (node env, in-memory libsql, mocked at the `lib/plaid/client` seam), and the board-load dirty-sync trigger implemented as a post-mount client call to a `syncDirtyItems()` action rather than an in-request fire-and-forget, which can be frozen on serverless hosts. The HLD's `fire-and-forget` phrasing is pinned onto that reliable transport; triggers stay connect / board-load / manual refresh / post-repair.
+
+One factual discrepancy surfaced against the HLD: its schema comment says transaction amounts store "negative = outflow (matches Plaid)", but Plaid's convention is positive = money out, negative = money in. Storage is unaffected; the LLD pins the real convention and flags the HLD line for correction.
+
+No application code changed. TODO.md unchanged — the LLD refines the existing finance tasks rather than adding new ones.

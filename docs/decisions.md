@@ -151,3 +151,23 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** A note belongs to zero or one folder, and folders cannot contain other folders. Existing and explicitly unassigned notes appear as Unfiled. Deleting a folder permanently deletes its notes and their linked diagrams through database foreign-key cascades.
 
 **Consequences:** Filtering, moving, and deletion remain easy to understand. Nested organization can be introduced later with a superseding decision if real use demonstrates the need.
+
+## 2026-09-14 — Adopt Vitest for focused backend tests
+
+**Status:** Accepted
+
+**Context:** There is no test suite. The finance widgets HLD's verification section requires focused tests before any live financial data — token encryption, owner authorization, webhook signature verification, sync reconciliation with cursor rollback, duplicate webhook delivery, and disconnect failure handling. A financial sync should not ship with browser testing alone.
+
+**Decision:** Use Vitest (node environment, colocated `*.test.ts` files, `npm test`) for these focused backend tests. Plaid SDK calls are mocked at the `lib/plaid/client` module seam; database-backed tests run against an in-memory libsql (`:memory:`) with the generated schema applied per test. No browser/e2e tooling, no mocking-library ecosystem beyond Vitest itself.
+
+**Consequences:** A new dev dependency and test script. Backend correctness for the finance integration becomes verifiable without Turso network access or a live Plaid account. Broader UI testing remains unaddressed by design.
+
+## 2026-09-14 — Finance board-load sync triggers from the client, not an in-request fire-and-forget
+
+**Status:** Accepted (pins a mechanism the finance HLD left open)
+
+**Context:** The finance widgets HLD specifies that a board load starts a sync for dirty items but not how. An in-request server-side fire-and-forget promise can be frozen after the response on serverless hosts, and the deployment boundary is not yet settled.
+
+**Decision:** After mount, the finance panels call a `syncDirtyItems()` server action once per page load; it syncs items flagged `dirty` by webhooks and returns the fresh snapshot for panel reconciliation. The webhook still does no sync work, and the trigger set stays: connect, post-mount dirty check, manual refresh, post-repair.
+
+**Consequences:** One small client roundtrip per page load. Works on both long-running and serverless hosts; if staleness ever matters, the next step remains a scheduled job.
