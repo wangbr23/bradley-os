@@ -25,7 +25,7 @@ This is the most important principle in this file. The simple solution beats the
 ## Commands
 - Install: `npm install`
 - Dev/run: `npm run dev`
-- Test: (none yet)
+- Test: `npm test`
 - Lint/typecheck: `npm run lint`
 - Build: `npm run build`
 - DB schema push: `npm run db:push`
@@ -34,7 +34,7 @@ This is the most important principle in this file. The simple solution beats the
 
 ## Conventions
 - Code style: default eslint-config-next; no additional formatter configured yet. Keep page/component presentation in colocated CSS Modules; reserve `app/globals.css` for tokens, resets, and shared semantic primitives rather than Tailwind utility strings in JSX.
-- Testing approach: none set up yet.
+- Testing approach: Vitest (node environment), colocated `*.test.ts` files, run with `npm test`. DB-backed tests run against an in-memory libsql database (`lib/db/test-harness.ts`, generated migrations applied per test) injected through the `lib/db/client` module seam; Plaid SDK calls are mocked at the `lib/plaid/client` seam (finance LLD §8).
 - Commit message format: not yet decided (no git repo initialized yet).
 
 ## Architecture

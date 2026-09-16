@@ -48,8 +48,8 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 
 ### Setup and schema
 - [x] `T6` Create the Plaid account (Sandbox) and add PLAID_CLIENT_ID, PLAID_SECRET, and FINANCE_ENCRYPTION_KEY to .env — manual, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
-- [ ] `T7` Install the new dependencies plaid, react-plaid-link, and jose — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
-- [ ] `T8` Set up Vitest with the in-memory libsql test harness, add the npm test script, and note the testing approach in AGENTS.md — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T7` Install the new dependencies plaid, react-plaid-link, and jose (plaid 47.0.0, react-plaid-link 5.0.0, jose 6.2.12) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T8` Set up Vitest with the in-memory libsql test harness, add the npm test script, and note the testing approach in AGENTS.md (vitest 5.0.1; @types/node aligned to ^24 per the Node 24 engines pin to satisfy vitest's peer range) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T9` Add the finance schema (plaid_items, financial_accounts, financial_transactions with the two indexes), generate the migration, and push it — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 
 ### Security prerequisites

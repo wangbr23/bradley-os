@@ -10,6 +10,7 @@
     "build": "./scripts/with-local-ca.sh next build",
     "start": "./scripts/with-local-ca.sh next start",
     "lint": "eslint",
+    "test": "vitest run",
     "db:generate": "drizzle-kit generate",
     "db:push": "./scripts/with-local-ca.sh drizzle-kit push",
     "db:studio": "./scripts/with-local-ca.sh drizzle-kit studio"
@@ -32,23 +33,27 @@
     "drizzle-orm": "^0.45.2",
     "googleapis": "^174.0.1",
     "imapflow": "^1.7.1",
+    "jose": "^6.2.12",
     "luxon": "^3.7.2",
     "next": "16.3.1",
     "next-auth": "^5.0.0-beta.32",
+    "plaid": "^47.0.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-grid-layout": "^1.5.4",
+    "react-plaid-link": "^5.0.0",
     "zustand": "^5.0.15"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24.13.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.1"
   }
 }
