@@ -28,6 +28,9 @@ yarn-error.log*
 # playwright-mcp
 .playwright-mcp/
 
+# lavish review artifacts
+.lavish/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
