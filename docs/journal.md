@@ -171,3 +171,9 @@ Two derived choices were recorded in `docs/decisions.md`: Vitest as the first te
 One factual discrepancy surfaced against the HLD: its schema comment says transaction amounts store "negative = outflow (matches Plaid)", but Plaid's convention is positive = money out, negative = money in. Storage is unaffected; the LLD pins the real convention and flags the HLD line for correction.
 
 No application code changed. TODO.md unchanged — the LLD refines the existing finance tasks rather than adding new ones.
+
+## 2026-09-17 — Owner authorization hardened
+
+Updated the shared `requireOwner()` guard to compare the authenticated session email directly with the configured `OWNER_EMAIL`, case-insensitively, before allowing protected work. The guard now fails closed for a missing configured owner, missing session/email, or a different identity; its existing no-return success contract and `Unauthorized` error remain unchanged, so all Notes, Todos, layout, Inbox, search, and future finance callers gain the stronger check without call-site changes.
+
+Added the focused Vitest coverage required by the finance LLD: no session rejects, a different email rejects, and the configured owner passes despite casing and surrounding environment-variable whitespace. The focused test, full 4-test suite, and ESLint pass. T10 is complete; the remaining pre-live security tasks are T11, T12, and T34.

@@ -53,7 +53,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] `T9` Add the finance schema (plaid_items, financial_accounts, financial_transactions with the two indexes), generate the migration, and push it (migration 0003 generated and harness-verified; `db:push` pending — no Turso credentials in this checkout, run `npm run db:push` once env is available) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 
 ### Security prerequisites
-- [ ] `T10` Harden requireOwner() to compare the session email against OWNER_EMAIL directly, with a focused test — agent, complexity: simple, depends-on: T8, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T10` Harden requireOwner() to compare the session email against OWNER_EMAIL directly, with a focused test — agent, complexity: simple, depends-on: T8, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T11` Add security headers (HSTS, frame-ancestors 'none', nosniff, Referrer-Policy) and the Plaid-compatible CSP to next.config.ts — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T12` Stop exposing googleAccessToken through the Auth.js session: serve it server-only via lib/auth/google-token.ts (getToken) and update the calendar consumers and session types — agent, complexity: complex, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 

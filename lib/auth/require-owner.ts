@@ -4,5 +4,8 @@ import { auth } from "@/auth";
 
 export async function requireOwner() {
   const session = await auth();
-  if (!session?.user) throw new Error("Unauthorized");
+  const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
+  if (!ownerEmail || session?.user?.email?.toLowerCase() !== ownerEmail) {
+    throw new Error("Unauthorized");
+  }
 }
