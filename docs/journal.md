@@ -199,3 +199,9 @@ Focused ESLint and all four Vitest tests pass. TypeScript reaches only the alrea
 Narrowed the overloaded Auth.js `auth` mock in `lib/auth/require-owner.test.ts` to its zero-argument `Promise<Session | null>` signature. Vitest had executed the mock correctly, but TypeScript inferred Auth.js's middleware overload and rejected the test's null and session return values during production builds.
 
 The focused test, full four-test suite, focused and full ESLint, and `tsc --noEmit` pass. The production build also completes when supplied the required auth environment variables; without them, this checkout now gets past the fixed TypeScript phase and stops later because its local `.env` lacks `OWNER_EMAIL`, which is separate from T35.
+
+## 2026-09-18 — Plaid access-token encryption added
+
+Added the server-only `lib/plaid/crypto.ts` boundary for encrypting Plaid access tokens at rest. It validates `FINANCE_ENCRYPTION_KEY` as exactly 32 bytes encoded in hex, uses a fresh 12-byte nonce with AES-256-GCM, stores the nonce/ciphertext/16-byte authentication tag in the pinned `v1` string format, and rejects malformed envelopes, unknown versions, wrong keys, and authenticated-data tampering before returning plaintext.
+
+Added 11 focused Vitest cases covering format and roundtrip behavior, nonce freshness, ciphertext/tag tampering, wrong/missing/malformed keys, malformed payloads, and unknown versions. The focused and full 15-test suites, ESLint, and `tsc --noEmit` pass. The production build also passes with non-secret placeholder auth values; without them, it reaches the existing `OWNER_EMAIL` page-data requirement after compiling and typechecking successfully. T14 is complete; future finance actions and sync work will own persistence and Plaid calls.
