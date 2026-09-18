@@ -177,3 +177,19 @@ No application code changed. TODO.md unchanged — the LLD refines the existing 
 Updated the shared `requireOwner()` guard to compare the authenticated session email directly with the configured `OWNER_EMAIL`, case-insensitively, before allowing protected work. The guard now fails closed for a missing configured owner, missing session/email, or a different identity; its existing no-return success contract and `Unauthorized` error remain unchanged, so all Notes, Todos, layout, Inbox, search, and future finance callers gain the stronger check without call-site changes.
 
 Added the focused Vitest coverage required by the finance LLD: no session rejects, a different email rejects, and the configured owner passes despite casing and surrounding environment-variable whitespace. The focused test, full 4-test suite, and ESLint pass. T10 is complete; the remaining pre-live security tasks are T11, T12, and T34.
+
+## 2026-09-17 — Static security headers added
+
+Configured application-wide security headers in `next.config.ts`: a restrictive default CSP with Plaid Link limited to `cdn.plaid.com` for scripts/frames and `*.plaid.com` for connections, `frame-ancestors 'none'`, HSTS, `X-Content-Type-Options: nosniff`, and `Referrer-Policy: strict-origin-when-cross-origin`. The LLD's accepted static-policy tradeoff remains explicit in behavior: Next hydration retains `'unsafe-inline'`; local development alone also allows `unsafe-eval` and WebSockets because React debugging and Turbopack HMR require them.
+
+Production/development config assertions, ESLint, the full 4-test Vitest suite, and whitespace validation pass. The production bundle compiles and loads the config successfully, but its TypeScript phase remains blocked by pre-existing Auth.js mock typing errors in `lib/auth/require-owner.test.ts`; recorded as T35 instead of expanding T11. T11 is complete. Next security implementation task: T12.
+
+## 2026-09-18 — Finance schema applied to Turso
+
+Applied generated migration 0003's finance schema to the production Turso database after restoring the database URL and auth token locally. Drizzle reported that the changes were applied successfully; T9 no longer has a pending database-push step.
+
+## 2026-09-18 — Plaid SDK client added
+
+Added the server-only `lib/plaid/client.ts` seam for all future Plaid backend calls. `getPlaidClient()` lazily validates the client id, secret, and exact Sandbox/Production environment, configures the official SDK's base URL and credential headers, and reuses one process-local `PlaidApi` instance. T13 makes no network request and keeps future Plaid SDK mocking behind one module boundary.
+
+Focused ESLint and all four Vitest tests pass. TypeScript reaches only the already-tracked T35 Auth.js test-mock errors and reports no error in the new module.

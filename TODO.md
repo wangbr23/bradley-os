@@ -50,15 +50,16 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] `T6` Create the Plaid account (Sandbox) and add PLAID_CLIENT_ID, PLAID_SECRET, and FINANCE_ENCRYPTION_KEY to .env — manual, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [x] `T7` Install the new dependencies plaid, react-plaid-link, and jose (plaid 47.0.0, react-plaid-link 5.0.0, jose 6.2.12) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [x] `T8` Set up Vitest with the in-memory libsql test harness, add the npm test script, and note the testing approach in AGENTS.md (vitest 5.0.1; @types/node aligned to ^24 per the Node 24 engines pin to satisfy vitest's peer range) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
-- [x] `T9` Add the finance schema (plaid_items, financial_accounts, financial_transactions with the two indexes), generate the migration, and push it (migration 0003 generated and harness-verified; `db:push` pending — no Turso credentials in this checkout, run `npm run db:push` once env is available) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T9` Add the finance schema (plaid_items, financial_accounts, financial_transactions with the two indexes), generate the migration, and push it (migration 0003 generated and harness-verified; schema applied to Turso on 2026-09-18) — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 
 ### Security prerequisites
 - [x] `T10` Harden requireOwner() to compare the session email against OWNER_EMAIL directly, with a focused test — agent, complexity: simple, depends-on: T8, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
-- [ ] `T11` Add security headers (HSTS, frame-ancestors 'none', nosniff, Referrer-Policy) and the Plaid-compatible CSP to next.config.ts — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T11` Add security headers (HSTS, frame-ancestors 'none', nosniff, Referrer-Policy) and the Plaid-compatible CSP to next.config.ts — agent, complexity: simple, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T12` Stop exposing googleAccessToken through the Auth.js session: serve it server-only via lib/auth/google-token.ts (getToken) and update the calendar consumers and session types — agent, complexity: complex, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [ ] `T35` Fix the Auth.js test mock typing in lib/auth/require-owner.test.ts so npm run build and tsc --noEmit pass — agent, complexity: simple, depends-on: T10
 
 ### Plaid backend modules
-- [ ] `T13` Add lib/plaid/client.ts, the env-driven Plaid SDK singleton (PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ENV) — agent, complexity: simple, depends-on: T7, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [x] `T13` Add lib/plaid/client.ts, the env-driven Plaid SDK singleton (PLAID_CLIENT_ID, PLAID_SECRET, PLAID_ENV) — agent, complexity: simple, depends-on: T7, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T14` Add lib/plaid/crypto.ts AES-256-GCM access-token encryption in the versioned v1:nonce:ciphertext:tag format, with focused tests — agent, complexity: complex, depends-on: T8, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T15` Add lib/plaid/sync.ts runItemSync: paginate /transactions/sync, apply added/modified/removed with one-transaction cursor writes, map Plaid errors to item status; test reconciliation and cursor rollback — agent, complexity: complex, depends-on: T8, T9, T13, T14, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 - [ ] `T16` Add lib/plaid/snapshot.ts: the FinanceSnapshot type and read queries (combined depository balance, depository top-5, per-card window query, per-widget lastSyncAt), with a focused test — agent, complexity: complex, depends-on: T8, T9, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
@@ -84,7 +85,7 @@ See `docs/designs/2026-08-15-v1-design-spec.html` for the full design spec this 
 - [x] `T30` Confirm the product spec's open questions: OQ1 bank-widget transaction scope (blocks T25), OQ2 retained history depth, OQ3 app-session durations, OQ4 the draft FR-5 transaction details page — manual, design: docs/designs/2026-09-14-finance-widgets-product-spec.md
 - [ ] `T31` Confirm intended institution coverage and the account's Trial/Pay-as-you-go limits and prices in the Plaid Dashboard — manual, depends-on: T6, design: docs/designs/2026-09-14-plaid-integration-research.md
 - [ ] `T32` Document the Production HTTPS deployment and webhook boundary before connecting live accounts — manual, design: docs/designs/2026-09-14-plaid-integration-research.md
-- [ ] `T33` Connect one real institution on Trial and run it for several days before adding more Items — manual, depends-on: T10, T11, T12, T28, T29, T30, T31, T32, T34, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
+- [ ] `T33` Connect one real institution on Trial and run it for several days before adding more Items — manual, depends-on: T10, T11, T12, T28, T29, T30, T31, T32, T34, T35, design: docs/designs/2026-09-14-finance-widgets-high-level-design-lld.md
 
 ### App sessions (OQ3 resolution)
 - [ ] `T34` Configure Auth.js session durations in auth.ts: 24-hour maximum with a 30-minute idle refresh — agent, complexity: simple, depends-on: T30, design: docs/designs/2026-09-14-finance-widgets-product-spec.md
