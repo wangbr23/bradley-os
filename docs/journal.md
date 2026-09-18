@@ -193,3 +193,9 @@ Applied generated migration 0003's finance schema to the production Turso databa
 Added the server-only `lib/plaid/client.ts` seam for all future Plaid backend calls. `getPlaidClient()` lazily validates the client id, secret, and exact Sandbox/Production environment, configures the official SDK's base URL and credential headers, and reuses one process-local `PlaidApi` instance. T13 makes no network request and keeps future Plaid SDK mocking behind one module boundary.
 
 Focused ESLint and all four Vitest tests pass. TypeScript reaches only the already-tracked T35 Auth.js test-mock errors and reports no error in the new module.
+
+## 2026-09-18 — Auth.js test mock build blocker fixed
+
+Narrowed the overloaded Auth.js `auth` mock in `lib/auth/require-owner.test.ts` to its zero-argument `Promise<Session | null>` signature. Vitest had executed the mock correctly, but TypeScript inferred Auth.js's middleware overload and rejected the test's null and session return values during production builds.
+
+The focused test, full four-test suite, focused and full ESLint, and `tsc --noEmit` pass. The production build also completes when supplied the required auth environment variables; without them, this checkout now gets past the fixed TypeScript phase and stops later because its local `.env` lacks `OWNER_EMAIL`, which is separate from T35.

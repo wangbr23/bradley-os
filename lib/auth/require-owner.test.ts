@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Session } from "next-auth";
 
 import { auth } from "@/auth";
 import { requireOwner } from "./require-owner";
@@ -6,7 +7,7 @@ import { requireOwner } from "./require-owner";
 vi.mock("server-only", () => ({}));
 vi.mock("@/auth", () => ({ auth: vi.fn() }));
 
-const mockAuth = vi.mocked(auth);
+const mockAuth = vi.mocked(auth as () => Promise<Session | null>);
 
 describe("requireOwner", () => {
   beforeEach(() => {
