@@ -181,3 +181,13 @@ Append-only log of architecture decisions. One entry per decision, newest at the
 **Decision:** OQ1: the Bank Accounts widget shows the five most recent transactions combined across all connected bank accounts. OQ2: request Plaid's maximum 730-day history window at first link. OQ3: Auth.js app sessions use a 24-hour maximum with a 30-minute idle timeout; app sessions only, never affecting bank connections. OQ4: the FR-5 transaction details page is deferred; the 730-day history stays cached locally so the page can be added cheaply later.
 
 **Consequences:** The LLD's accepted-for-now stances (combined five, 730 days) become final and the bank panel task is unblocked. Session-duration configuration becomes a small standalone auth.ts task (TODO T34), gating go-live with the other pre-live security items. The deferred details page keeps its LLD sketch (§9) and needs no schema change if revived.
+
+## 2026-09-18 — Sync refreshes balances only for accounts present in the delta
+
+**Status:** Accepted
+
+**Context:** The widgets promise balances "as of the last successful update" (product spec NFR-2.1), but Plaid's `/transactions/sync` response includes only accounts associated with the transactions it returns. Keeping the sync engine strictly transaction-only would leave balances frozen at their initial-connect values, since no later task refreshes them; treating each response as a full account snapshot would be wrong because absent accounts may simply have had no activity.
+
+**Decision:** `runItemSync` updates existing `financial_accounts` rows that appear in a sync response (name, mask, type, subtype, current/available balances; `currencyCode` only when Plaid supplies an ISO code), scoped to the same item, inside the same transaction as the cursor write. Accounts absent from the response are assumed unchanged, and the sync engine never inserts, deletes, or reconciles accounts. Rare silent staleness — authorization holds, bank-side corrections, or fees that produce no transaction event — is accepted.
+
+**Consequences:** Balances stay fresh in the common case with zero extra Plaid calls. If staleness ever shows up in practice, a periodic or on-demand `/accounts/get` refresh (generally free) can be added without schema change. Initial account rows and balances still come from `/accounts/get` during connect (T20).
