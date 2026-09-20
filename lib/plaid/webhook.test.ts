@@ -83,11 +83,11 @@ describe("verifyPlaidWebhook", () => {
     });
   });
 
-  it("passes through error and consent_expiration_time fields", async () => {
+  it("maps the snake_case error_code and consent_expiration_time fields", async () => {
     const body = webhookBody({
       webhook_type: "ITEM",
       webhook_code: "ERROR",
-      error: { errorCode: "ITEM_LOGIN_REQUIRED" },
+      error: { error_code: "ITEM_LOGIN_REQUIRED" },
       consent_expiration_time: "2026-10-01T00:00:00Z",
     });
     const token = await signToken(body);

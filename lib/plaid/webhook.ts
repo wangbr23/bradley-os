@@ -44,7 +44,10 @@ export async function verifyPlaidWebhook(
       webhookType: body.webhook_type,
       webhookCode: body.webhook_code,
       itemId: body.item_id,
-      error: body.error ?? undefined,
+      error:
+        typeof body.error?.error_code === "string"
+          ? { errorCode: body.error.error_code }
+          : undefined,
       consentExpirationTime: body.consent_expiration_time ?? undefined,
     };
   } catch {
