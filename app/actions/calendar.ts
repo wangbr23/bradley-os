@@ -1,6 +1,7 @@
 "use server";
 
 import { auth } from "@/auth";
+import { getGoogleToken } from "@/lib/auth/google-token";
 import {
   createPrimaryCalendarEvent,
   getPrimaryCalendarEventsSnapshot,
@@ -10,10 +11,11 @@ import {
 
 async function requireCalendarAccess() {
   const session = await auth();
-  if (!session?.user || !session.googleAccessToken || session.googleTokenError) {
+  const token = await getGoogleToken();
+  if (!session?.user || !token.accessToken || token.error) {
     throw new Error("Google Calendar access is unavailable");
   }
-  return session.googleAccessToken;
+  return token.accessToken;
 }
 
 export async function getCalendarEvents(start: Date, end: Date) {

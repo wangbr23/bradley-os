@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
+import { getGoogleToken } from "@/lib/auth/google-token";
 import { WeekCalendar } from "@/components/calendar/week-calendar";
 import {
   CALENDAR_TIME_ZONE,
@@ -28,15 +29,16 @@ export default async function CalendarPage() {
   if (!session) redirect("/sign-in");
 
   const range = getCurrentCalendarWeekRange();
+  const token = await getGoogleToken();
   let events: CalendarEvent[] = [];
   let error: "access" | "request" | null = null;
 
-  if (!session.googleAccessToken || session.googleTokenError) {
+  if (!token.accessToken || token.error) {
     error = "access";
   } else {
     try {
       events = (
-        await getPrimaryCalendarEventsSnapshot(session.googleAccessToken, range)
+        await getPrimaryCalendarEventsSnapshot(token.accessToken, range)
       ).events;
     } catch (cause) {
       error = "request";

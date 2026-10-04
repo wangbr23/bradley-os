@@ -15,6 +15,8 @@ const ownerEmail = requireEnv("OWNER_EMAIL").toLowerCase();
 const googleClientId = requireEnv("GOOGLE_CLIENT_ID");
 const googleClientSecret = requireEnv("GOOGLE_CLIENT_SECRET");
 
+export const authSecret = requireEnv("AUTH_SECRET");
+
 async function refreshGoogleAccessToken(token: {
   googleRefreshToken?: string;
 }) {
@@ -96,10 +98,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { ...token, googleTokenError: "RefreshAccessTokenError" };
       }
     },
-    session({ session, token }) {
-      session.googleAccessToken = token.googleAccessToken;
-      session.googleTokenError = token.googleTokenError;
-      return session;
     },
-  },
 });
