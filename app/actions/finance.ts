@@ -8,6 +8,7 @@ import { financialAccounts, plaidItems } from "@/lib/db/schema";
 import { requireOwner } from "@/lib/auth/require-owner";
 import { getPlaidClient } from "@/lib/plaid/client";
 import { decryptAccessToken, encryptAccessToken } from "@/lib/plaid/crypto";
+import { getFinanceSnapshot, type FinanceSnapshot } from "@/lib/plaid/snapshot";
 import { runItemSync } from "@/lib/plaid/sync";
 
 // The 730-day history window is fixed at first link (product spec OQ2) and
@@ -140,4 +141,54 @@ export async function exchangePublicToken(
   await runItemSync(itemId);
 
   return { itemId };
+}
+
+// Post-mount trigger (LLD §6.4): the webhook only sets dirty=1, so the next
+// board load syncs every flagged item. Never throws to the client — a failing
+// item stays dirty for the next trigger and the current snapshot is returned.
+export async function syncDirtyItems(): Promise<FinanceSnapshot> {
+  await requireOwner();
+
+  const items = await db
+    .select({ id: plaidItems.id })
+    .from(plaidItems)
+    .where(eq(plaidItems.dirty, true));
+
+  for (const item of items) {
+    try {
+      await runItemSync(item.id);
+    } catch {
+      // Item state was already handled by runItemSync (auth errors mark
+      // needs_attention); the failure is not surfaced to the client.
+    }
+  }
+
+  return getFinanceSnapshot();
+}
+
+// Manual refresh (FR-4.3): syncs every healthy item regardless of dirty. A
+// needs_attention item is skipped — its data cannot move until repair (§5.6).
+export async function syncNow(): Promise<FinanceSnapshot> {
+  await requireOwner();
+
+  const items = await db
+    .select({ id: plaidItems.id })
+    .from(plaidItems)
+    .where(eq(plaidItems.status, "healthy"));
+
+  for (const item of items) {
+    await runItemSync(item.id);
+  }
+
+  return getFinanceSnapshot();
+}
+
+// Post-repair sync (§5.4): runs the same sync for the one item just repaired,
+// regardless of its status — a successful sync is what heals the item.
+export async function syncItem(itemId: string): Promise<FinanceSnapshot> {
+  await requireOwner();
+
+  await runItemSync(itemId);
+
+  return getFinanceSnapshot();
 }

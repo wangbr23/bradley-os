@@ -14,6 +14,7 @@ const {
   accountsGetMock,
   itemRemoveMock,
   transactionsSyncMock,
+  getFinanceSnapshotMock,
   requireOwnerMock,
 } = vi.hoisted(() => ({
   linkTokenCreateMock: vi.fn(),
@@ -22,6 +23,7 @@ const {
   accountsGetMock: vi.fn(),
   itemRemoveMock: vi.fn(),
   transactionsSyncMock: vi.fn(),
+  getFinanceSnapshotMock: vi.fn(),
   requireOwnerMock: vi.fn(),
 }));
 
@@ -36,6 +38,10 @@ vi.mock("@/lib/plaid/client", () => ({
   }),
 }));
 
+vi.mock("@/lib/plaid/snapshot", () => ({
+  getFinanceSnapshot: getFinanceSnapshotMock,
+}));
+
 vi.mock("@/lib/auth/require-owner", () => ({ requireOwner: requireOwnerMock }));
 
 const ACCESS_TOKEN = "access-sandbox-test";
@@ -48,6 +54,11 @@ let db: Awaited<ReturnType<typeof createTestDb>>;
 let createLinkToken: (typeof import("./finance"))["createLinkToken"];
 let repairItem: (typeof import("./finance"))["repairItem"];
 let exchangePublicToken: (typeof import("./finance"))["exchangePublicToken"];
+let syncDirtyItems: (typeof import("./finance"))["syncDirtyItems"];
+let syncNow: (typeof import("./finance"))["syncNow"];
+let syncItem: (typeof import("./finance"))["syncItem"];
+
+const SNAPSHOT = { marker: "finance-snapshot" };
 
 function plaidResponse() {
   return {
@@ -388,6 +399,131 @@ describe("exchangePublicToken", () => {
   });
 });
 
+describe("syncDirtyItems", () => {
+  beforeEach(setupAction);
+
+  it("syncs only the items marked dirty and returns the fresh snapshot", async () => {
+    await seedItem({
+      id: "item-dirty",
+      institutionId: "ins_1",
+      dirty: true,
+      encryptedAccessToken: encryptAccessToken("access-dirty"),
+    });
+    await seedItem({
+      id: "item-clean",
+      institutionId: "ins_2",
+      dirty: false,
+      encryptedAccessToken: encryptAccessToken("access-clean"),
+    });
+
+    await expect(syncDirtyItems()).resolves.toBe(SNAPSHOT);
+
+    expect(transactionsSyncMock).toHaveBeenCalledTimes(1);
+    expect(transactionsSyncMock).toHaveBeenCalledWith({
+      access_token: "access-dirty",
+      count: 100,
+    });
+  });
+
+  it("returns the current snapshot when a sync fails instead of throwing", async () => {
+    await seedItem({
+      id: "item-dirty",
+      institutionId: "ins_1",
+      dirty: true,
+      encryptedAccessToken: encryptAccessToken("access-dirty"),
+    });
+    transactionsSyncMock.mockRejectedValue(new Error("rate limited"));
+
+    await expect(syncDirtyItems()).resolves.toBe(SNAPSHOT);
+  });
+
+  it("requires the owner before touching Plaid", async () => {
+    requireOwnerMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(syncDirtyItems()).rejects.toThrow("Unauthorized");
+    expect(transactionsSyncMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("syncNow", () => {
+  beforeEach(setupAction);
+
+  it("syncs every healthy item regardless of dirty and skips needs_attention items", async () => {
+    await seedItem({
+      id: "item-healthy-dirty",
+      institutionId: "ins_1",
+      dirty: true,
+      encryptedAccessToken: encryptAccessToken("access-1"),
+    });
+    await seedItem({
+      id: "item-healthy-clean",
+      institutionId: "ins_2",
+      dirty: false,
+      encryptedAccessToken: encryptAccessToken("access-2"),
+    });
+    await seedItem({
+      id: "item-attention",
+      institutionId: "ins_3",
+      status: "needs_attention",
+      dirty: true,
+      encryptedAccessToken: encryptAccessToken("access-3"),
+    });
+
+    await expect(syncNow()).resolves.toBe(SNAPSHOT);
+
+    expect(transactionsSyncMock).toHaveBeenCalledTimes(2);
+    const tokens = transactionsSyncMock.mock.calls.map((call) => call[0].access_token);
+    expect(tokens).toEqual(["access-1", "access-2"]);
+  });
+
+  it("propagates a sync failure", async () => {
+    await seedItem({ id: "item-1", institutionId: "ins_1" });
+    transactionsSyncMock.mockRejectedValue(new Error("sync failed"));
+
+    await expect(syncNow()).rejects.toThrow("sync failed");
+  });
+
+  it("requires the owner before touching Plaid", async () => {
+    requireOwnerMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(syncNow()).rejects.toThrow("Unauthorized");
+    expect(transactionsSyncMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("syncItem", () => {
+  beforeEach(setupAction);
+
+  it("syncs the repaired item even when it needs attention and returns the snapshot", async () => {
+    await seedItem({
+      id: "item-repairing",
+      institutionId: "ins_1",
+      status: "needs_attention",
+      lastErrorCode: "ITEM_LOGIN_REQUIRED",
+    });
+
+    await expect(syncItem("item-repairing")).resolves.toBe(SNAPSHOT);
+    expect(transactionsSyncMock).toHaveBeenCalledWith({
+      access_token: ACCESS_TOKEN,
+      count: 100,
+    });
+  });
+
+  it("throws for an unknown item without contacting Plaid", async () => {
+    await expect(syncItem("item-unknown")).rejects.toThrow(
+      "Plaid item not found: item-unknown",
+    );
+    expect(transactionsSyncMock).not.toHaveBeenCalled();
+  });
+
+  it("requires the owner before touching Plaid", async () => {
+    requireOwnerMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(syncItem("item-1")).rejects.toThrow("Unauthorized");
+    expect(transactionsSyncMock).not.toHaveBeenCalled();
+  });
+});
+
 async function setupAction() {
   db = await createTestDb();
   vi.stubEnv("FINANCE_ENCRYPTION_KEY", ENCRYPTION_KEY);
@@ -400,7 +536,9 @@ async function setupAction() {
   accountsGetMock.mockReset().mockResolvedValue(accountsGetResponse());
   itemRemoveMock.mockReset().mockResolvedValue({ data: { request_id: "req-remove" } });
   transactionsSyncMock.mockReset().mockResolvedValue(transactionSyncResponse());
-  ({ createLinkToken, repairItem, exchangePublicToken } = await import("./finance"));
+  getFinanceSnapshotMock.mockReset().mockResolvedValue(SNAPSHOT);
+  ({ createLinkToken, repairItem, exchangePublicToken, syncDirtyItems, syncNow, syncItem } =
+    await import("./finance"));
 }
 
 afterEach(() => {
