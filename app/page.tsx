@@ -7,13 +7,14 @@ import { BoardClient } from "@/components/board/board-loader";
 import { getCurrentCalendarWeekRange } from "@/lib/calendar/google";
 import { db } from "@/lib/db/client";
 import { folders, notes, todos } from "@/lib/db/schema";
+import { getFinanceSnapshot } from "@/lib/plaid/snapshot";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const range = getCurrentCalendarWeekRange();
-  const [noteList, todoList, persistedLayout] = await Promise.all([
+  const [noteList, todoList, persistedLayout, financeSnapshot] = await Promise.all([
     db
       .select({ id: notes.id, title: notes.title, updatedAt: notes.updatedAt, folderName: folders.name })
       .from(notes)
@@ -24,6 +25,7 @@ export default async function Home() {
       .from(todos)
       .orderBy(asc(todos.done), desc(todos.createdAt)),
     getHomeLayout(),
+    getFinanceSnapshot(),
   ]);
 
   const initialLayout = Array.isArray(persistedLayout) ? (persistedLayout as Layout[]) : null;
@@ -60,6 +62,7 @@ export default async function Home() {
             recentNotes={noteList.slice(0, 6)}
             totalNotes={noteList.length}
             todos={todoList}
+            financeSnapshot={financeSnapshot}
             now={new Date()}
           />
         </div>
