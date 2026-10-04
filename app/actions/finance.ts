@@ -9,7 +9,7 @@ import { requireOwner } from "@/lib/auth/require-owner";
 import { getPlaidClient } from "@/lib/plaid/client";
 import { decryptAccessToken, encryptAccessToken } from "@/lib/plaid/crypto";
 import { getFinanceSnapshot, type FinanceSnapshot } from "@/lib/plaid/snapshot";
-import { runItemSync } from "@/lib/plaid/sync";
+import { getPlaidError, runItemSync } from "@/lib/plaid/sync";
 
 // The 730-day history window is fixed at first link (product spec OQ2) and
 // cannot be raised later without deleting and relinking the Item.
@@ -191,4 +191,33 @@ export async function syncItem(itemId: string): Promise<FinanceSnapshot> {
   await runItemSync(itemId);
 
   return getFinanceSnapshot();
+}
+
+// Disconnect (LLD §5.5): /item/remove first, then purge the local row so the
+// schema's cascade wipes accounts and transactions. A Plaid "item not found"
+// response still counts as success — a retry after a failed purge finds the
+// item already removed on Plaid's side and must be able to finish the purge.
+export async function disconnectItem(itemId: string): Promise<void> {
+  await requireOwner();
+
+  const [item] = await db
+    .select({ encryptedAccessToken: plaidItems.encryptedAccessToken })
+    .from(plaidItems)
+    .where(eq(plaidItems.id, itemId));
+
+  if (!item) {
+    throw new Error(`Plaid item not found: ${itemId}`);
+  }
+
+  try {
+    await getPlaidClient().itemRemove({
+      access_token: decryptAccessToken(item.encryptedAccessToken),
+    });
+  } catch (error) {
+    if (getPlaidError(error)?.error_code !== "ITEM_NOT_FOUND") {
+      throw error;
+    }
+  }
+
+  await db.delete(plaidItems).where(eq(plaidItems.id, itemId));
 }

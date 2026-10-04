@@ -57,6 +57,7 @@ let exchangePublicToken: (typeof import("./finance"))["exchangePublicToken"];
 let syncDirtyItems: (typeof import("./finance"))["syncDirtyItems"];
 let syncNow: (typeof import("./finance"))["syncNow"];
 let syncItem: (typeof import("./finance"))["syncItem"];
+let disconnectItem: (typeof import("./finance"))["disconnectItem"];
 
 const SNAPSHOT = { marker: "finance-snapshot" };
 
@@ -524,6 +525,72 @@ describe("syncItem", () => {
   });
 });
 
+describe("disconnectItem", () => {
+  beforeEach(setupAction);
+
+  it("removes the item at Plaid and purges the local row with its accounts", async () => {
+    await seedItem();
+    await db.insert(financialAccounts).values({
+      id: "acc-1",
+      itemId: "item-1",
+      name: "Checking",
+      mask: "1234",
+      type: "depository",
+      subtype: "checking",
+      currentBalance: 100.5,
+      availableBalance: 90.5,
+      currencyCode: "USD",
+      updatedAt: new Date("2026-09-18T12:00:00.000Z"),
+    });
+
+    await expect(disconnectItem("item-1")).resolves.toBeUndefined();
+
+    expect(itemRemoveMock).toHaveBeenCalledWith({
+      access_token: ACCESS_TOKEN,
+    });
+    expect(await db.select().from(plaidItems)).toHaveLength(0);
+    expect(await db.select().from(financialAccounts)).toHaveLength(0);
+  });
+
+  it("throws and keeps every row when Plaid rejects the removal", async () => {
+    await seedItem();
+    itemRemoveMock.mockRejectedValue(new Error("rate limited"));
+
+    await expect(disconnectItem("item-1")).rejects.toThrow("rate limited");
+    expect(await db.select().from(plaidItems)).toHaveLength(1);
+  });
+
+  it("treats a Plaid item-not-found response as success so a failed purge can be retried", async () => {
+    await seedItem();
+    const plaidError = Object.assign(new Error("ITEM_NOT_FOUND"), {
+      response: {
+        data: {
+          error_code: "ITEM_NOT_FOUND",
+          error_message: "The specified Item was not found",
+        },
+      },
+    });
+    itemRemoveMock.mockRejectedValue(plaidError);
+
+    await expect(disconnectItem("item-1")).resolves.toBeUndefined();
+    expect(await db.select().from(plaidItems)).toHaveLength(0);
+  });
+
+  it("throws for an unknown item without contacting Plaid", async () => {
+    await expect(disconnectItem("item-unknown")).rejects.toThrow(
+      "Plaid item not found: item-unknown",
+    );
+    expect(itemRemoveMock).not.toHaveBeenCalled();
+  });
+
+  it("requires the owner before touching Plaid", async () => {
+    requireOwnerMock.mockRejectedValue(new Error("Unauthorized"));
+
+    await expect(disconnectItem("item-1")).rejects.toThrow("Unauthorized");
+    expect(itemRemoveMock).not.toHaveBeenCalled();
+  });
+});
+
 async function setupAction() {
   db = await createTestDb();
   vi.stubEnv("FINANCE_ENCRYPTION_KEY", ENCRYPTION_KEY);
@@ -537,7 +604,7 @@ async function setupAction() {
   itemRemoveMock.mockReset().mockResolvedValue({ data: { request_id: "req-remove" } });
   transactionsSyncMock.mockReset().mockResolvedValue(transactionSyncResponse());
   getFinanceSnapshotMock.mockReset().mockResolvedValue(SNAPSHOT);
-  ({ createLinkToken, repairItem, exchangePublicToken, syncDirtyItems, syncNow, syncItem } =
+  ({ createLinkToken, repairItem, exchangePublicToken, syncDirtyItems, syncNow, syncItem, disconnectItem } =
     await import("./finance"));
 }
 

@@ -41,7 +41,7 @@ function chunk<T>(values: T[], size: number): T[][] {
 // The Plaid SDK rejects with an Axios error whose response.data holds the
 // Plaid error object; Axios is only a transitive dependency, so inspect the
 // shape structurally instead of importing AxiosError.
-function getPlaidError(error: unknown): PlaidErrorShape | null {
+export function getPlaidError(error: unknown): PlaidErrorShape | null {
   if (typeof error !== "object" || error === null) {
     return null;
   }
