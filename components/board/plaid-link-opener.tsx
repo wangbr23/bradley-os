@@ -16,15 +16,11 @@ interface LinkOpenerProps {
 // destroys the Plaid Link UI. The token never changes while mounted, so the
 // hook's create-on-token-change behavior is irrelevant here.
 export function LinkOpener({ token, onSuccess, onExit, onScriptError }: LinkOpenerProps) {
-  const { open, ready, error } = usePlaidLink({
-    token,
-    onSuccess,
-    onExit,
-    // Required for Production OAuth institutions: Link needs the current URL
-    // to resume after the bank's redirect back (LLD §6.10, deployment-boundary
-    // TODO). Sandbox non-OAuth banks ignore it.
-    receivedRedirectUri: window.location.href,
-  });
+  // No receivedRedirectUri here: it is only for reinitializing Link at a
+  // registered redirect URI after an OAuth redirect-back (Plaid OAuth guide).
+  // Passed on first open it makes Link resume a nonexistent session and the
+  // window never appears. This app has no redirect URI (desktop popup flow).
+  const { open, ready, error } = usePlaidLink({ token, onSuccess, onExit });
 
   useEffect(() => {
     if (ready) open();
