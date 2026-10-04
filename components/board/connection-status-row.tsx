@@ -1,11 +1,14 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 import styles from "./finance.module.css";
 
 interface ConnectionStatusRowProps {
   institutionName: string;
   status: "healthy" | "needs_attention";
   lastErrorCode: string | null;
+  action?: ReactNode;
 }
 
 // One line per connected institution, labeling the connection state
@@ -15,6 +18,7 @@ export function ConnectionStatusRow({
   institutionName,
   status,
   lastErrorCode,
+  action,
 }: ConnectionStatusRowProps) {
   const healthy = status === "healthy";
 
@@ -33,6 +37,7 @@ export function ConnectionStatusRow({
             : `Needs attention${lastErrorCode ? ` (${lastErrorCode})` : ""}`}
         </span>
       </p>
+      {action ? <div className={styles.statusActions}>{action}</div> : null}
     </div>
   );
 }

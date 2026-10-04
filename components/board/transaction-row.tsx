@@ -1,6 +1,6 @@
 "use client";
 
-import { formatMoney, formatTransactionDate } from "@/lib/finance/format";
+import { formatTransactionAmount, formatTransactionDate } from "@/lib/finance/format";
 import type { TransactionView } from "@/lib/plaid/snapshot";
 import styles from "./finance.module.css";
 
@@ -19,7 +19,7 @@ export function TransactionRow({ transaction }: { transaction: TransactionView }
       <p className={styles.amountCell}>
         <span className={styles.amount} data-in={moneyIn}>
           {moneyIn ? "+" : ""}
-          {formatMoney(transaction.amount, transaction.currencyCode)}
+          {formatTransactionAmount(transaction.amount, transaction.currencyCode)}
         </span>
         {transaction.pending ? <span className={styles.pending}>pending</span> : null}
       </p>
