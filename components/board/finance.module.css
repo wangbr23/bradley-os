@@ -1,0 +1,36 @@
+.amountCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+
+.amount {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.amount[data-in="true"] {
+  color: var(--accent);
+}
+
+.pending {
+  font-family: var(--font-mono);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  padding: 0.05rem 0.3rem;
+}
+
+.statusDot {
+  color: var(--accent);
+  margin-right: 0.3rem;
+}
+
+.statusDot[data-healthy="false"] {
+  color: var(--error);
+}

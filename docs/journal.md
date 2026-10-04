@@ -275,3 +275,17 @@ The actual Link UI lives in `components/board/plaid-link-opener.tsx`, dynamicall
 Styling is a small colocated module (`plaid-link-launcher.module.css`): the button reuses the global `ink-action` class with disabled-state overrides, and an uppercase mono error line in `--error`. No tests added — LLD §8's mapping has no client-component coverage and existing panels have none either. Deliberately skipped: `receivedRedirectUri` for OAuth institutions, which only matters behind the production HTTPS boundary (TODO T32, unresolved).
 
 Full 82-test suite, ESLint, and `tsc --noEmit` pass. Next: T24 (shared panel pieces: transaction-row, connection-status row, finance.module.css), then T25/T26.
+
+## 2026-10-04 — Shared finance panel pieces added (T24)
+
+Added the three shared pieces both finance panels reuse. `components/board/transaction-row.tsx` renders one `TransactionView` as a standard `panel-row` (name + date sub-line left, amount right). Per LLD §6.14 the amount is formatted with `Intl.NumberFormat("en-US", { style: "currency", currency })` client-side: stored negative = money in → absolute value with an explicit `+` prefix in `--accent`; stored positive = money out → plain. Pending rows get a small bordered "pending" chip under the amount (FR-1.4/2.4). Plaid dates are `YYYY-MM-DD`, parsed as UTC (`T00:00:00Z`) so the short-form date (e.g. "Oct 2") never shifts a day under a local timezone.
+
+`components/board/connection-status-row.tsx` renders one line per institution (name + "Connected" / "Needs attention (ERROR_CODE)") with a status dot — accent when healthy, `--error` when not. It takes the flattened `{ institutionName, status, lastErrorCode }` shape rather than `ItemView` directly, so the panels decide what to pass (and "disconnected" stays the panels' empty state, not a row). The HLD names this piece; the LLD file tree didn't list it, so it lives next to the launcher as `connection-status-row.tsx`.
+
+`components/board/finance.module.css` holds the shared styles (amount cell, pending chip, status dot) using the existing tokens; panels will add their own classes to it in T25/T26. No tests added — same reasoning as T23 (client presentation, LLD §8 covers backend only).
+
+Full 82-test suite, ESLint, and `tsc --noEmit` pass. Next: T25 (bank-accounts-panel) and T26 (credit-cards-panel), both depend on T23 + T24.
+
+## 2026-10-04 — Formatting helpers extracted to lib/finance/format.ts
+
+Per the no-god-files principle, moved `formatDate`/`formatAmount` (plus the UTC date formatter) out of `transaction-row.tsx` into a new pure module `lib/finance/format.ts`, following the `lib/calendar/format.ts` precedent (client-safe, no server deps). Exported as `formatTransactionDate` and `formatMoney` to avoid generic-name collisions at import sites; the component now imports them. The panels' combined-balance stat in T25 will reuse `formatMoney`. Lint, tsc, and the 82-test suite still pass.
