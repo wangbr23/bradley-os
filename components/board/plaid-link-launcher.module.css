@@ -1,0 +1,17 @@
+.button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.button:disabled::after {
+  display: none;
+}
+
+.error {
+  margin-top: 0.4rem;
+  color: var(--error);
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  letter-spacing: 0.025em;
+  text-transform: uppercase;
+}
