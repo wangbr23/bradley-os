@@ -15,7 +15,9 @@ export function getPlaidClient() {
     throw new Error("PLAID_CLIENT_ID and PLAID_SECRET are required");
   }
   if (environment !== "sandbox" && environment !== "production") {
-    throw new Error('PLAID_ENV must be "sandbox" or "production"');
+    throw new Error(
+      `PLAID_ENV must be "sandbox" or "production", got ${JSON.stringify(environment)}`,
+    );
   }
 
   const configuration = new Configuration({
