@@ -139,7 +139,8 @@ describe("getFinanceSnapshot", () => {
 
     const snapshot = await getFinanceSnapshot();
 
-    expect(snapshot.bank.combinedBalance).toBe(125.5);
+    // Checking uses available (80); Savings has none and falls back to current (25.5).
+    expect(snapshot.bank.combinedBalance).toBe(105.5);
     expect(snapshot.bank.lastSyncAt).toEqual(BANK_LAST_SYNC);
     expect(snapshot.bank.accounts).toEqual([
       {

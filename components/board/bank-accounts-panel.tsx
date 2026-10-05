@@ -91,7 +91,7 @@ export const BankAccountsPanel = forwardRef<HTMLDivElement, BankAccountsPanelPro
           ...current,
           accounts,
           combinedBalance: accounts.reduce(
-            (sum, account) => sum + (account.currentBalance ?? 0),
+            (sum, account) => sum + (account.availableBalance ?? account.currentBalance ?? 0),
             0,
           ),
         };
@@ -124,7 +124,7 @@ export const BankAccountsPanel = forwardRef<HTMLDivElement, BankAccountsPanelPro
         statValue={
           bank.accounts.length === 0 ? "—" : formatMoney(bank.combinedBalance, statCurrency)
         }
-        statLabel="combined balance"
+        statLabel="available balance"
         footer={
           <div className="panel-footer-actions">
             <span>
@@ -191,21 +191,22 @@ export const BankAccountsPanel = forwardRef<HTMLDivElement, BankAccountsPanelPro
                   }
                 />
               ))}
-              {bank.accounts.map((account) => (
-                <div className="panel-row" key={account.id}>
-                  <p className="row-main">
-                    {account.name}
-                    {account.mask ? (
-                      <span className="row-sub"> ••{account.mask}</span>
-                    ) : null}
-                  </p>
-                  <p className={styles.amount}>
-                    {account.currentBalance === null
-                      ? "—"
-                      : formatMoney(account.currentBalance, account.currencyCode)}
-                  </p>
-                </div>
-              ))}
+              {bank.accounts.map((account) => {
+                const balance = account.availableBalance ?? account.currentBalance;
+                return (
+                  <div className="panel-row" key={account.id}>
+                    <p className="row-main">
+                      {account.name}
+                      {account.mask ? (
+                        <span className="row-sub"> ••{account.mask}</span>
+                      ) : null}
+                    </p>
+                    <p className={styles.amount}>
+                      {balance === null ? "—" : formatMoney(balance, account.currencyCode)}
+                    </p>
+                  </div>
+                );
+              })}
               {bank.recent.length > 0 ? (
                 <>
                   <p className={styles.sectionLabel}>Recent activity</p>

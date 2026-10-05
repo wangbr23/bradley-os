@@ -88,8 +88,10 @@ export async function getFinanceSnapshot(): Promise<FinanceSnapshot> {
         availableBalance: financialAccounts.availableBalance,
         currencyCode: financialAccounts.currencyCode,
         lastSyncAt: plaidItems.lastSyncAt,
+        // Available (current minus pending/holds) matches what bank apps show;
+        // current is the fallback when an institution omits available.
         typeBalance:
-          sql<number>`coalesce(sum(${financialAccounts.currentBalance}) over (partition by ${financialAccounts.type}), 0)`.as(
+          sql<number>`coalesce(sum(coalesce(${financialAccounts.availableBalance}, ${financialAccounts.currentBalance})) over (partition by ${financialAccounts.type}), 0)`.as(
             "type_balance",
           ),
       })
