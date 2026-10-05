@@ -28,7 +28,7 @@ const ACCESS_TOKEN = "access-sandbox-test";
 const ENCRYPTION_KEY = "11".repeat(32);
 
 let db: Awaited<ReturnType<typeof createTestDb>>;
-let runItemSync: (itemId: string) => Promise<void>;
+let runItemSync: typeof import("@/lib/plaid/sync").runItemSync;
 
 function plaidPage(overrides: Record<string, unknown> = {}) {
   return {
