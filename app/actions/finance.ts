@@ -177,7 +177,7 @@ export async function syncNow(): Promise<FinanceSnapshot> {
     .where(eq(plaidItems.status, "healthy"));
 
   for (const item of items) {
-    await runItemSync(item.id, { refresh: true });
+    await runItemSync(item.id);
   }
 
   return getFinanceSnapshot();

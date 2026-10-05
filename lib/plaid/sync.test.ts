@@ -7,17 +7,15 @@ import { encryptAccessToken } from "@/lib/plaid/crypto";
 
 vi.mock("server-only", () => ({}));
 
-const { transactionsSyncMock, accountsGetMock, transactionsRefreshMock } = vi.hoisted(() => ({
+const { transactionsSyncMock, accountsGetMock } = vi.hoisted(() => ({
   transactionsSyncMock: vi.fn(),
   accountsGetMock: vi.fn(),
-  transactionsRefreshMock: vi.fn(),
 }));
 
 vi.mock("@/lib/plaid/client", () => ({
   getPlaidClient: () => ({
     transactionsSync: transactionsSyncMock,
     accountsGet: accountsGetMock,
-    transactionsRefresh: transactionsRefreshMock,
   }),
 }));
 
@@ -138,9 +136,7 @@ describe("runItemSync", () => {
     db = await createTestDb();
     transactionsSyncMock.mockReset();
     accountsGetMock.mockReset();
-    transactionsRefreshMock.mockReset();
     accountsGetMock.mockResolvedValue({ data: { accounts: [] } });
-    transactionsRefreshMock.mockResolvedValue({ data: {} });
     vi.resetModules();
     vi.doMock("@/lib/db/client", () => ({ db }));
     ({ runItemSync } = await import("@/lib/plaid/sync"));
@@ -371,40 +367,17 @@ describe("runItemSync", () => {
     expect(item.lastSyncAt).toEqual(NOW);
   });
 
-  it("calls transactionsRefresh when refresh option is set", async () => {
+  it("updates balances even when the sync returns no transaction changes", async () => {
     await seedItem();
     await seedAccount();
-    transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
-
-    await runItemSync("item-1", { refresh: true });
-
-    expect(transactionsRefreshMock).toHaveBeenCalledWith({ access_token: ACCESS_TOKEN });
-    expect(transactionsSyncMock).toHaveBeenCalled();
-  });
-
-  it("still syncs when transactionsRefresh is rejected", async () => {
-    await seedItem();
-    await seedAccount();
-    transactionsRefreshMock.mockRejectedValue(plaidFailure("PRODUCTS_NOT_SUPPORTED"));
     transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
     accountsGetMock.mockResolvedValue({ data: { accounts: [plaidAccount()] } });
 
-    await runItemSync("item-1", { refresh: true });
-
-    const [account] = await db.select().from(financialAccounts);
-    expect(account.currentBalance).toBe(100.25);
-    const [item] = await db.select().from(plaidItems).where(eq(plaidItems.id, "item-1"));
-    expect(item).toMatchObject({ syncCursor: "cursor-1", status: "healthy" });
-  });
-
-  it("skips transactionsRefresh by default", async () => {
-    await seedItem();
-    await seedAccount();
-    transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
-
     await runItemSync("item-1");
 
-    expect(transactionsRefreshMock).not.toHaveBeenCalled();
+    expect(accountsGetMock).toHaveBeenCalledWith({ access_token: ACCESS_TOKEN });
+    const [account] = await db.select().from(financialAccounts);
+    expect(account).toMatchObject({ currentBalance: 100.25, availableBalance: 50, updatedAt: NOW });
   });
 
   it("fails fast for an unknown item without calling Plaid", async () => {
