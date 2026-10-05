@@ -164,14 +164,21 @@ export const CreditCardsPanel = forwardRef<HTMLDivElement, CreditCardsPanelProps
               ) : null}
             </span>
             {cards.accounts.length > 0 ? (
-              <button
-                type="button"
-                className={`ink-action ${styles.button}`}
-                onClick={() => void handleRefresh()}
-                disabled={busy}
-              >
-                Refresh
-              </button>
+              <div className={styles.footerActions}>
+                <PlaidLinkLauncher
+                  mode="connect"
+                  label="Connect card"
+                  onConnected={handleConnected}
+                />
+                <button
+                  type="button"
+                  className={`ink-action ${styles.button}`}
+                  onClick={() => void handleRefresh()}
+                  disabled={busy}
+                >
+                  Refresh
+                </button>
+              </div>
             ) : null}
           </div>
         }

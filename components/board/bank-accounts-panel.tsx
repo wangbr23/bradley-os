@@ -134,14 +134,21 @@ export const BankAccountsPanel = forwardRef<HTMLDivElement, BankAccountsPanelPro
               ) : null}
             </span>
             {bank.accounts.length > 0 ? (
-              <button
-                type="button"
-                className={`ink-action ${styles.button}`}
-                onClick={() => void handleRefresh()}
-                disabled={busy}
-              >
-                Refresh
-              </button>
+              <div className={styles.footerActions}>
+                <PlaidLinkLauncher
+                  mode="connect"
+                  label="Connect bank"
+                  onConnected={handleConnected}
+                />
+                <button
+                  type="button"
+                  className={`ink-action ${styles.button}`}
+                  onClick={() => void handleRefresh()}
+                  disabled={busy}
+                >
+                  Refresh
+                </button>
+              </div>
             ) : null}
           </div>
         }
