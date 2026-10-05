@@ -137,6 +137,17 @@ describe("POST /api/plaid/webhook", () => {
     });
   });
 
+  it("marks the item dirty for SYNC_UPDATES_AVAILABLE", async () => {
+    await seedItem("item-1");
+
+    const response = await postVerified(
+      webhookBody({ webhook_code: "SYNC_UPDATES_AVAILABLE" }),
+    );
+
+    expect(response.status).toBe(200);
+    expect(await getItem("item-1")).toMatchObject({ dirty: true });
+  });
+
   it("treats a duplicate delivery as a no-op", async () => {
     await seedItem("item-1");
     const rawBody = webhookBody();

@@ -14,6 +14,7 @@ const {
   accountsGetMock,
   itemRemoveMock,
   transactionsSyncMock,
+  transactionsRefreshMock,
   getFinanceSnapshotMock,
   requireOwnerMock,
 } = vi.hoisted(() => ({
@@ -23,6 +24,7 @@ const {
   accountsGetMock: vi.fn(),
   itemRemoveMock: vi.fn(),
   transactionsSyncMock: vi.fn(),
+  transactionsRefreshMock: vi.fn(),
   getFinanceSnapshotMock: vi.fn(),
   requireOwnerMock: vi.fn(),
 }));
@@ -35,6 +37,7 @@ vi.mock("@/lib/plaid/client", () => ({
     accountsGet: accountsGetMock,
     itemRemove: itemRemoveMock,
     transactionsSync: transactionsSyncMock,
+    transactionsRefresh: transactionsRefreshMock,
   }),
 }));
 
@@ -603,6 +606,7 @@ async function setupAction() {
   accountsGetMock.mockReset().mockResolvedValue(accountsGetResponse());
   itemRemoveMock.mockReset().mockResolvedValue({ data: { request_id: "req-remove" } });
   transactionsSyncMock.mockReset().mockResolvedValue(transactionSyncResponse());
+  transactionsRefreshMock.mockReset().mockResolvedValue({ data: {} });
   getFinanceSnapshotMock.mockReset().mockResolvedValue(SNAPSHOT);
   ({ createLinkToken, repairItem, exchangePublicToken, syncDirtyItems, syncNow, syncItem, disconnectItem } =
     await import("./finance"));

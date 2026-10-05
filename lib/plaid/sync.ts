@@ -87,7 +87,10 @@ function mapTransaction(transaction: Transaction, updatedAt: Date): FinancialTra
 // actions own both boundaries. Caller contract: regular sync triggers only
 // select healthy items, so a successful sync of a needs_attention item means
 // update-mode repair just completed and the item may be healed.
-export async function runItemSync(itemId: string): Promise<void> {
+export async function runItemSync(
+  itemId: string,
+  { refresh = false }: { refresh?: boolean } = {},
+): Promise<void> {
   const [item] = await db
     .select({
       encryptedAccessToken: plaidItems.encryptedAccessToken,
@@ -103,6 +106,14 @@ export async function runItemSync(itemId: string): Promise<void> {
 
   const accessToken = decryptAccessToken(item.encryptedAccessToken);
   const client = getPlaidClient();
+
+  // Manual refresh: ask Plaid to pull the latest data from the institution
+  // before syncing. The call is async on Plaid's side — new transactions may
+  // not appear until the webhook fires — but balances from accountsGet (below)
+  // will already reflect the latest state.
+  if (refresh) {
+    await client.transactionsRefresh({ access_token: accessToken });
+  }
 
   const added: Transaction[] = [];
   const modified: Transaction[] = [];
@@ -145,6 +156,11 @@ export async function runItemSync(itemId: string): Promise<void> {
     throw error;
   }
 
+  // Fetch authoritative balances for all accounts on this item, not just
+  // those with transaction changes — /transactions/sync only returns accounts
+  // tied to returned transactions, so balance-only changes were missed.
+  const allAccounts = await client.accountsGet({ access_token: accessToken });
+
   const now = new Date();
   await db.transaction(async (tx) => {
     const transactionRows = [...added, ...modified].map((transaction) =>
@@ -174,11 +190,7 @@ export async function runItemSync(itemId: string): Promise<void> {
       await tx.delete(financialTransactions).where(inArray(financialTransactions.id, batch));
     }
 
-    // The sync response only includes accounts tied to returned transactions,
-    // so this refreshes existing rows only — never an insert, delete, or full
-    // reconciliation (owner-accepted partial-refresh tradeoff). Currency is
-    // preserved when Plaid omits the ISO code rather than inventing one.
-    for (const account of accounts.values()) {
+    for (const account of allAccounts.data.accounts) {
       await tx
         .update(financialAccounts)
         .set({

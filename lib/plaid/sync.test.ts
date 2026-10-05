@@ -7,10 +7,18 @@ import { encryptAccessToken } from "@/lib/plaid/crypto";
 
 vi.mock("server-only", () => ({}));
 
-const { transactionsSyncMock } = vi.hoisted(() => ({ transactionsSyncMock: vi.fn() }));
+const { transactionsSyncMock, accountsGetMock, transactionsRefreshMock } = vi.hoisted(() => ({
+  transactionsSyncMock: vi.fn(),
+  accountsGetMock: vi.fn(),
+  transactionsRefreshMock: vi.fn(),
+}));
 
 vi.mock("@/lib/plaid/client", () => ({
-  getPlaidClient: () => ({ transactionsSync: transactionsSyncMock }),
+  getPlaidClient: () => ({
+    transactionsSync: transactionsSyncMock,
+    accountsGet: accountsGetMock,
+    transactionsRefresh: transactionsRefreshMock,
+  }),
 }));
 
 const NOW = new Date("2026-09-18T12:00:00.000Z");
@@ -129,6 +137,10 @@ describe("runItemSync", () => {
     vi.setSystemTime(NOW);
     db = await createTestDb();
     transactionsSyncMock.mockReset();
+    accountsGetMock.mockReset();
+    transactionsRefreshMock.mockReset();
+    accountsGetMock.mockResolvedValue({ data: { accounts: [] } });
+    transactionsRefreshMock.mockResolvedValue({ data: {} });
     vi.resetModules();
     vi.doMock("@/lib/db/client", () => ({ db }));
     ({ runItemSync } = await import("@/lib/plaid/sync"));
@@ -146,6 +158,19 @@ describe("runItemSync", () => {
     await seedTransaction({ id: "tx-mod", amount: 5, name: "Old Coffee" });
     await seedTransaction({ id: "tx-del", amount: 9, date: "2026-08-02", name: "Doomed" });
     await seedTransaction({ id: "tx-keep", amount: 3, date: "2026-08-03", name: "Keeper" });
+
+    accountsGetMock.mockResolvedValue({
+      data: {
+        accounts: [
+          plaidAccount(),
+          plaidAccount({
+            account_id: "acc-2",
+            name: "Savings Renamed",
+            balances: { current: 2, available: null, iso_currency_code: null, unofficial_currency_code: null },
+          }),
+        ],
+      },
+    });
 
     transactionsSyncMock
       .mockImplementationOnce(async () =>
@@ -344,6 +369,27 @@ describe("runItemSync", () => {
       syncCursor: "cursor-1",
     });
     expect(item.lastSyncAt).toEqual(NOW);
+  });
+
+  it("calls transactionsRefresh when refresh option is set", async () => {
+    await seedItem();
+    await seedAccount();
+    transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
+
+    await runItemSync("item-1", { refresh: true });
+
+    expect(transactionsRefreshMock).toHaveBeenCalledWith({ access_token: ACCESS_TOKEN });
+    expect(transactionsSyncMock).toHaveBeenCalled();
+  });
+
+  it("skips transactionsRefresh by default", async () => {
+    await seedItem();
+    await seedAccount();
+    transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
+
+    await runItemSync("item-1");
+
+    expect(transactionsRefreshMock).not.toHaveBeenCalled();
   });
 
   it("fails fast for an unknown item without calling Plaid", async () => {

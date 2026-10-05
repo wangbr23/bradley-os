@@ -13,6 +13,7 @@ function getTransition(
   webhook: PlaidWebhook,
 ): Partial<typeof plaidItems.$inferInsert> | null {
   switch (webhook.webhookCode) {
+    case "SYNC_UPDATES_AVAILABLE":
     case "TRANSACTIONS_UPDATED":
     case "INITIAL_UPDATE":
     case "HISTORICAL_UPDATE":
