@@ -19,7 +19,6 @@ import {
   updateCalendarEvent,
 } from "@/app/actions/calendar";
 import {
-  CALENDAR_TIME_ZONE,
   getDayKey,
   type CalendarEvent,
 } from "@/lib/calendar/format";
@@ -28,6 +27,7 @@ interface WeekCalendarProps {
   events: CalendarEvent[];
   initialDate: Date;
   compact?: boolean;
+  timeZone?: string;
 }
 
 function toFullCalendarEvent(event: CalendarEvent): EventInput {
@@ -44,7 +44,7 @@ function toFullCalendarEvent(event: CalendarEvent): EventInput {
   };
 }
 
-export function WeekCalendar({ events, initialDate, compact = false }: WeekCalendarProps) {
+export function WeekCalendar({ events, initialDate, compact = false, timeZone = "America/Los_Angeles" }: WeekCalendarProps) {
   const [visibleEvents, setVisibleEvents] = useState(events);
   const [writeError, setWriteError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -144,7 +144,7 @@ export function WeekCalendar({ events, initialDate, compact = false }: WeekCalen
         initialView="timeGridWeek"
         initialDate={initialDate}
         firstDay={1}
-        timeZone={CALENDAR_TIME_ZONE}
+        timeZone={timeZone}
         headerToolbar={
           compact
             ? { start: "prev,next", center: "title", end: "today" }

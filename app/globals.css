@@ -57,6 +57,28 @@ html {
 }
 
 /* An action styled like an ink underline instead of a filled button. */
+.tz-toggle {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.15em;
+  border: 1px solid var(--border);
+  background: none;
+  padding: 0.2rem 0.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.58rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 150ms;
+}
+
+.tz-toggle:hover { border-color: var(--accent); }
+.tz-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tz-toggle-active { color: var(--foreground); font-weight: 700; }
+.tz-toggle-sep { color: var(--border); }
+.tz-toggle-inactive { color: var(--muted); }
+
 .ink-action {
   position: relative;
   display: inline-block;
@@ -559,6 +581,10 @@ html {
 
   .panel-todo-check,
   .todos-panel .row-main {
+    transition: none;
+  }
+
+  .tz-toggle {
     transition: none;
   }
 }

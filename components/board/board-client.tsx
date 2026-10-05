@@ -9,6 +9,7 @@ import GridLayout, { WidthProvider, type Layout } from "react-grid-layout";
 import { saveLayout } from "@/app/actions/board-layout";
 import { syncDirtyItems } from "@/app/actions/finance";
 import type { FinanceSnapshot } from "@/lib/plaid/snapshot";
+import type { AppTimeZone } from "@/lib/timezone";
 import { BankAccountsPanel } from "./bank-accounts-panel";
 import { CalendarPanel } from "./calendar-panel";
 import { CreditCardsPanel } from "./credit-cards-panel";
@@ -50,6 +51,7 @@ interface BoardClientProps {
   todos: BoardTodo[];
   financeSnapshot: FinanceSnapshot;
   now: Date;
+  timeZone: AppTimeZone;
 }
 
 function resolveLayout(initialLayout: Layout[] | null) {
@@ -81,6 +83,7 @@ export function BoardClient({
   todos,
   financeSnapshot,
   now,
+  timeZone,
 }: BoardClientProps) {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [finance, setFinance] = useState(financeSnapshot);
@@ -117,8 +120,9 @@ export function BoardClient({
         today={today}
         weekStart={calendarWeekStart}
         weekEnd={calendarWeekEnd}
+        timeZone={timeZone}
       />
-      <InboxPanel key="inbox" />
+      <InboxPanel key="inbox" timeZone={timeZone} />
       <NotesPanel key="notes" notes={recentNotes} totalCount={totalNotes} now={now} />
       <TodosPanel key="todos" todos={todos} />
       <BankAccountsPanel key="bank-accounts" snapshot={finance} />

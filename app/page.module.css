@@ -36,6 +36,12 @@
   text-transform: uppercase;
   white-space: nowrap;
 }
+.mastheadRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
 .mastheadSignOut {
   font-family: var(--font-mono);
   font-size: 0.58rem;

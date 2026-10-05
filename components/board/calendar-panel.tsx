@@ -1,35 +1,33 @@
 "use client";
 
-import { forwardRef, type HTMLAttributes, useCallback, useEffect, useState } from "react";
+import { forwardRef, type HTMLAttributes, useCallback, useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
 import { getCalendarEventsSnapshot } from "@/app/actions/calendar";
-import { CALENDAR_TIME_ZONE, type CalendarEvent } from "@/lib/calendar/format";
+import { type CalendarEvent } from "@/lib/calendar/format";
+import type { AppTimeZone } from "@/lib/timezone";
+import { tzShort } from "@/lib/timezone";
 import { PanelShell } from "./panel-shell";
 import { cachedCalendarWeeks } from "./dashboard-cache";
 
-// FullCalendar is heavy; loading it through a separate chunk keeps the rest of
-// the board interactive while the calendar code arrives.
 const WeekCalendar = dynamic(
   () => import("@/components/calendar/week-calendar").then((module) => module.WeekCalendar),
   { ssr: false, loading: () => <p className="panel-empty">Loading calendar…</p> },
 );
 
-const todayEyebrowFormatter = new Intl.DateTimeFormat("en-US", {
-  timeZone: CALENDAR_TIME_ZONE,
-  month: "short",
-  day: "numeric",
-});
-
 interface CalendarPanelProps extends HTMLAttributes<HTMLDivElement> {
   today: Date;
   weekStart: Date;
   weekEnd: Date;
+  timeZone: AppTimeZone;
 }
 
 export const CalendarPanel = forwardRef<HTMLDivElement, CalendarPanelProps>(
-  function CalendarPanel({ today, weekStart, weekEnd, ...rest }, ref) {
+  function CalendarPanel({ today, weekStart, weekEnd, timeZone, ...rest }, ref) {
+    const todayEyebrow = useMemo(() => {
+      return new Intl.DateTimeFormat("en-US", { timeZone, month: "short", day: "numeric" }).format(today);
+    }, [today, timeZone]);
     const cacheKey = `${weekStart.toISOString()}:${weekEnd.toISOString()}`;
     const [events, setEvents] = useState<CalendarEvent[]>(
       () => cachedCalendarWeeks.get(cacheKey) ?? [],
@@ -65,8 +63,8 @@ export const CalendarPanel = forwardRef<HTMLDivElement, CalendarPanelProps>(
         ref={ref}
         {...rest}
         glyph="○"
-        eyebrow={`Today, ${todayEyebrowFormatter.format(today)}`}
-        title="Calendar ○ · Pacific time"
+        eyebrow={`Today, ${todayEyebrow}`}
+        title={`Calendar ○ · ${tzShort(timeZone)} time`}
         statValue={String(events.length)}
         statLabel={events.length === 1 ? "event this week" : "events this week"}
         footer={
@@ -81,7 +79,7 @@ export const CalendarPanel = forwardRef<HTMLDivElement, CalendarPanelProps>(
           ) : error && events.length === 0 ? (
             <p className="panel-empty">Calendar unavailable.</p>
           ) : (
-            <WeekCalendar events={events} initialDate={weekStart} compact />
+            <WeekCalendar events={events} initialDate={weekStart} compact timeZone={timeZone} />
           )
         }
       />

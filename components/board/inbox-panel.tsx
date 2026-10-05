@@ -1,25 +1,24 @@
 "use client";
 
-import { forwardRef, type HTMLAttributes, useCallback, useEffect, useState } from "react";
+import { forwardRef, type HTMLAttributes, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 import { getInboxData } from "@/app/actions/inbox";
-import { CALENDAR_TIME_ZONE } from "@/lib/calendar/format";
 import type { InboxDigestMessage } from "@/lib/mail/inbox";
+import type { AppTimeZone } from "@/lib/timezone";
 import { PanelShell } from "./panel-shell";
 import { cachedInbox, setCachedInbox } from "./dashboard-cache";
 
-// Matches the time formatting already used on /inbox.
-const receivedAtFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: CALENDAR_TIME_ZONE,
-});
-
-type InboxPanelProps = HTMLAttributes<HTMLDivElement>;
+interface InboxPanelProps extends HTMLAttributes<HTMLDivElement> {
+  timeZone: AppTimeZone;
+}
 
 export const InboxPanel = forwardRef<HTMLDivElement, InboxPanelProps>(
-  function InboxPanel({ className, ...rest }, ref) {
+  function InboxPanel({ className, timeZone, ...rest }, ref) {
+    const receivedAtFormatter = useMemo(
+      () => new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit", timeZone }),
+      [timeZone],
+    );
     const [messages, setMessages] = useState<InboxDigestMessage[]>(() => cachedInbox ?? []);
     const [loading, setLoading] = useState(cachedInbox === null);
     const [error, setError] = useState(false);
