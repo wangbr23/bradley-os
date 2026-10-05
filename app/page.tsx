@@ -33,25 +33,25 @@ export default async function Home() {
   return (
     <div className={styles.page}>
       <div className={styles.inner}>
-        <div className={styles.intro}>
-          <div className="ledger-rule" />
-          <div className={styles.statusRow}>
-            <p className={styles.status}>
-              ○ Signed in
-            </p>
-            <form
-              action={async () => {
-                "use server";
-                await signOut({ redirectTo: "/sign-in" });
-              }}
-            >
-              <button type="submit" className="ink-action">
-                ✕ Sign out
-              </button>
-            </form>
+        <header className={styles.masthead}>
+          <div className={styles.mastheadLeft}>
+            <h1 className={styles.mastheadTitle}>Bradley-OS</h1>
+            <span className={styles.mastheadSep}>·</span>
+            <time className={styles.mastheadDate} dateTime={new Date().toISOString().slice(0, 10)}>
+              {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+            </time>
           </div>
-          <h1 className={styles.title}>bradley-os</h1>
-        </div>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/sign-in" });
+            }}
+          >
+            <button type="submit" className={styles.mastheadSignOut}>
+              Sign out
+            </button>
+          </form>
+        </header>
 
         <div className={styles.board}>
           <BoardClient
