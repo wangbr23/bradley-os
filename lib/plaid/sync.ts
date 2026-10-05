@@ -107,12 +107,15 @@ export async function runItemSync(
   const accessToken = decryptAccessToken(item.encryptedAccessToken);
   const client = getPlaidClient();
 
-  // Manual refresh: ask Plaid to pull the latest data from the institution
-  // before syncing. The call is async on Plaid's side — new transactions may
-  // not appear until the webhook fires — but balances from accountsGet (below)
-  // will already reflect the latest state.
+  // Best-effort nudge for Plaid to re-pull from the institution; results land
+  // later via webhook. Some institutions reject it (PRODUCTS_NOT_SUPPORTED),
+  // which must not block the sync and balance update below.
   if (refresh) {
-    await client.transactionsRefresh({ access_token: accessToken });
+    try {
+      await client.transactionsRefresh({ access_token: accessToken });
+    } catch {
+      // Ignored: the sync below still runs with whatever Plaid already has.
+    }
   }
 
   const added: Transaction[] = [];

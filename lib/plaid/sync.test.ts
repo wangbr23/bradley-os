@@ -382,6 +382,21 @@ describe("runItemSync", () => {
     expect(transactionsSyncMock).toHaveBeenCalled();
   });
 
+  it("still syncs when transactionsRefresh is rejected", async () => {
+    await seedItem();
+    await seedAccount();
+    transactionsRefreshMock.mockRejectedValue(plaidFailure("PRODUCTS_NOT_SUPPORTED"));
+    transactionsSyncMock.mockResolvedValue(plaidPage({ next_cursor: "cursor-1" }));
+    accountsGetMock.mockResolvedValue({ data: { accounts: [plaidAccount()] } });
+
+    await runItemSync("item-1", { refresh: true });
+
+    const [account] = await db.select().from(financialAccounts);
+    expect(account.currentBalance).toBe(100.25);
+    const [item] = await db.select().from(plaidItems).where(eq(plaidItems.id, "item-1"));
+    expect(item).toMatchObject({ syncCursor: "cursor-1", status: "healthy" });
+  });
+
   it("skips transactionsRefresh by default", async () => {
     await seedItem();
     await seedAccount();
